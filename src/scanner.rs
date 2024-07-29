@@ -139,10 +139,12 @@ enum Symbols {
 }
 
 pub trait ScannerMethods {
-    fn new(text: &'static str) -> Self;
+    fn new(text: &'static str, strict: bool) -> Self;
     fn get_char(&mut self) -> char;
     fn next_char(&mut self) -> ();
     fn get_next_symbol(&mut self) -> Result<Symbols, (Box<std::string::String>, usize, usize)>;
+    fn is_capitalize_reserved_keyword(&self, text: &str, pos: usize) -> Option<Symbols>;
+    fn is_reserved_keyword(&self, text: &str, pos: usize) -> Option<Symbols>;
 }
 
 
@@ -151,16 +153,18 @@ pub struct Scanner {
     source: Vec<char>,
     position: usize,
     lineno: usize,
+    strict: bool
 }
 
 impl ScannerMethods for Scanner {
 
 
-    fn new(text: &'static str) -> Scanner {
+    fn new(text: &'static str, strict: bool) -> Scanner {
         Scanner {
         source: text.chars().collect(),
         position: 0,
-        lineno: 1
+        lineno: 1,
+        strict: strict
         }
     }
 
@@ -189,6 +193,124 @@ impl ScannerMethods for Scanner {
 
     fn next_char(&mut self) -> () {
         self.position = self.position + 1
+    }
+
+    fn is_capitalize_reserved_keyword(&self, text: &str, pos: usize) -> Option<Symbols> {
+        match text {
+            "CELL" => Some(Symbols::Cell(pos)),
+            "CELLNET" => Some(Symbols::CellNet(pos)),
+            "AWAIT" => Some(Symbols::Await(pos)),
+            "BEGIN" => Some(Symbols::Begin(pos)),
+            "BY" => Some(Symbols::By(pos)),
+            "CONST" => Some(Symbols::Const(pos)),
+            "CASE" => Some(Symbols::Case(pos)),
+            "CODE" => Some(Symbols::Code(pos)),
+            "DEFINITION" => Some(Symbols::Definition(pos)),
+            "DO" => Some(Symbols::Do(pos)),
+            "DIV" => Some(Symbols::Div(pos)),
+            "END" => Some(Symbols::End(pos)),
+            "ENUM" => Some(Symbols::Enum(pos)),
+            "ELSE" => Some(Symbols::Else(pos)),
+            "ELSIF" => Some(Symbols::Elsif(pos)),
+            "EXIT" => Some(Symbols::Exit(pos)),
+            "EXTERN" => Some(Symbols::Extern(pos)),
+            "FALSE" => Some(Symbols::False(pos)),
+            "FOR" => Some(Symbols::For(pos)),
+            "FINALLY" => Some(Symbols::Finally(pos)),
+            "IF" => Some(Symbols::If(pos)),
+            "IMAG" => Some(Symbols::Imag(pos)),
+            "IN" => Some(Symbols::In(pos)),
+            "IS" => Some(Symbols::Is(pos)),
+            "IMPORT" => Some(Symbols::Import(pos)),
+            "LOOP" => Some(Symbols::Loop(pos)),
+            "MODULE" => Some(Symbols::Module(pos)),
+            "MOD" => Some(Symbols::Mod(pos)),
+            "NIL" => Some(Symbols::Nil(pos)),
+            "OF" => Some(Symbols::Of(pos)),
+            "OR" => Some(Symbols::Or(pos)),
+            "OUT" => Some(Symbols::Out(pos)),
+            "OPERATOR" => Some(Symbols::Operator(pos)),
+            "PROCEDURE" => Some(Symbols::Procedure(pos)),
+            "PORT" => Some(Symbols::Port(pos)),
+            "REPEAT" => Some(Symbols::Repeat(pos)),
+            "RETURN" => Some(Symbols::Return(pos)),
+            "SELF" => Some(Symbols::_Self(pos)),
+            "RESULT" => Some(Symbols::Result(pos)),
+            "THEN" => Some(Symbols::Then(pos)),
+            "TO" => Some(Symbols::To(pos)),
+            "TYPE" => Some(Symbols::Type(pos)),
+            "UNTIL" => Some(Symbols::Until(pos)),
+            "VAR" => Some(Symbols::Var(pos)),
+            "WHILE" => Some(Symbols::While(pos)),
+            "WITH" => Some(Symbols::With(pos)),
+            "ARRAY" => Some(Symbols::Array(pos)),
+            "OBJECT" => Some(Symbols::Object(pos)),
+            "POINTER" => Some(Symbols::Pointer(pos)),
+            "RECORD" => Some(Symbols::Record(pos)),
+            "ADDRESS" => Some(Symbols::Address(pos)),
+            "SIZE" => Some(Symbols::Size(pos)),
+            "ALIAS" => Some(Symbols::Alias(pos)),
+            _ => None
+        }
+    }
+
+    fn is_reserved_keyword(&self, text: &str, pos: usize) -> Option<Symbols> {
+        match text {
+            "cell" => Some(Symbols::Cell(pos)),
+            "cellnet" => Some(Symbols::CellNet(pos)),
+            "await" => Some(Symbols::Await(pos)),
+            "begin" => Some(Symbols::Begin(pos)),
+            "by" => Some(Symbols::By(pos)),
+            "const" => Some(Symbols::Const(pos)),
+            "case" => Some(Symbols::Case(pos)),
+            "code" => Some(Symbols::Code(pos)),
+            "definition" => Some(Symbols::Definition(pos)),
+            "do" => Some(Symbols::Do(pos)),
+            "div" => Some(Symbols::Div(pos)),
+            "end" => Some(Symbols::End(pos)),
+            "enum" => Some(Symbols::Enum(pos)),
+            "else" => Some(Symbols::Else(pos)),
+            "elsif" => Some(Symbols::Elsif(pos)),
+            "exit" => Some(Symbols::Exit(pos)),
+            "extern" => Some(Symbols::Extern(pos)),
+            "false" => Some(Symbols::False(pos)),
+            "for" => Some(Symbols::For(pos)),
+            "finally" => Some(Symbols::Finally(pos)),
+            "if" => Some(Symbols::If(pos)),
+            "imag" => Some(Symbols::Imag(pos)),
+            "in" => Some(Symbols::In(pos)),
+            "is" => Some(Symbols::Is(pos)),
+            "import" => Some(Symbols::Import(pos)),
+            "loop" => Some(Symbols::Loop(pos)),
+            "module" => Some(Symbols::Module(pos)),
+            "mod" => Some(Symbols::Mod(pos)),
+            "nil" => Some(Symbols::Nil(pos)),
+            "of" => Some(Symbols::Of(pos)),
+            "or" => Some(Symbols::Or(pos)),
+            "out" => Some(Symbols::Out(pos)),
+            "operator" => Some(Symbols::Operator(pos)),
+            "procedure" => Some(Symbols::Procedure(pos)),
+            "port" => Some(Symbols::Port(pos)),
+            "repeat" => Some(Symbols::Repeat(pos)),
+            "return" => Some(Symbols::Return(pos)),
+            "self" => Some(Symbols::_Self(pos)),
+            "result" => Some(Symbols::Result(pos)),
+            "then" => Some(Symbols::Then(pos)),
+            "to" => Some(Symbols::To(pos)),
+            "type" => Some(Symbols::Type(pos)),
+            "until" => Some(Symbols::Until(pos)),
+            "var" => Some(Symbols::Var(pos)),
+            "while" => Some(Symbols::While(pos)),
+            "with" => Some(Symbols::With(pos)),
+            "array" => Some(Symbols::Array(pos)),
+            "object" => Some(Symbols::Object(pos)),
+            "pointer" => Some(Symbols::Pointer(pos)),
+            "record" => Some(Symbols::Record(pos)),
+            "address" => Some(Symbols::Address(pos)),
+            "size" => Some(Symbols::Size(pos)),
+            "alias" => Some(Symbols::Alias(pos)),
+            _ => None
+        }
     }
 
     fn get_next_symbol(&mut self) -> Result<Symbols, (Box<std::string::String>, usize, usize)> {
