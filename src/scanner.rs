@@ -129,9 +129,9 @@ enum Symbols {
     GreatterGreaterQ(usize), // >>?
 
     /* Literals */
-    Ident(usize, Box<str>),
+    Ident(usize, Box<String>),
     Number(usize),
-    String(usize, Box<str>),
+    String(usize, Box<String>),
     Char(usize),
 
     /* System */
@@ -404,10 +404,56 @@ impl ScannerMethods for Scanner {
                     _ => { return Ok(Symbols::Period(pos_symb)); }
                 }
             },
-            _ => ()
-        }
+            _ => {
 
-        todo!();
+                /* Handling identifier or reserved keyword */
+				if self.get_char().is_alphabetic() {
+					
+                    let mut buffer = std::string::String::new();
+                    
+                    loop {
+                        if self.get_char().is_alphanumeric() || self.get_char() == '_' {
+                            buffer.push(self.get_char());
+                            self.next_char();
+                            continue;
+                        }
+                        break;
+                    }
+
+                    if self.strict {
+                        let symb = self.is_capitalize_reserved_keyword(buffer.as_str(), pos_symb);
+
+                        match symb {
+                            Some(s) => { return Ok(s); },
+                            _ => {
+                                return Ok(Symbols::Ident(pos_symb, Box::new(buffer)))
+                            } 
+                        }
+                    }
+
+                    let symb1 = self.is_reserved_keyword(buffer.as_str(), pos_symb);
+                    match symb1 {
+                        Some(s) => { return Ok(s); },
+                        _ => {
+                           
+                            let symb2 = self.is_capitalize_reserved_keyword(buffer.as_str(), pos_symb);
+
+                            match symb2 {
+                                Some(s) => { return Ok(s); },
+                                _ => {
+                                    return Ok(Symbols::Ident(pos_symb, Box::new(buffer)))
+                                } 
+                            }
+                        } 
+                    }	
+				}
+
+
+
+
+                todo!();
+            }
+        }
     }
 }
 
@@ -427,6 +473,61 @@ mod tests {
                 match x {
                     Symbols::UnEqual(p) => {
                         assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn strict_keyword_await() {
+        let mut lexer = Scanner::new(" AWAIT", true);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::Await(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn keyword_await() {
+        let mut lexer = Scanner::new(" await", false);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::Await(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn literal_ident() {
+        let mut lexer = Scanner::new(" Test11_1", false);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::Ident(p, s) => {
+                        assert_eq!(1, p);
+                        assert_eq!(Box::new(String::from("Test11_1")), s);
                     },
                     _ => { assert!(false); }
                 }
