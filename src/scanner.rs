@@ -82,7 +82,7 @@ enum Symbols {
     Alias(usize),
 
     /* Operators or delimiters */
-    NotEqual(usize), // #
+    UnEqual(usize), // #
     And(usize), // &
     LeftParen(usize), // (
     RightParen(usize), // )
@@ -314,7 +314,124 @@ impl ScannerMethods for Scanner {
     }
 
     fn get_next_symbol(&mut self) -> Result<Symbols, (Box<std::string::String>, usize, usize)> {
+ 
+        /* Remove whitespace */
+        while self.get_char() == ' ' || self.get_char() == '\t' { self.next_char(); }
+
+        let pos_symb = self.position; /* Set start of symbol */
+
+        match self.get_char() {
+            '#' => { self.next_char(); return Ok(Symbols::UnEqual(pos_symb)); }
+            '*' => { self.next_char(); return Ok(Symbols::Mul(pos_symb)); }
+            '+' => { self.next_char(); return Ok(Symbols::Plus(pos_symb)); }
+            ',' => { self.next_char(); return Ok(Symbols::Comma(pos_symb)); }
+            '-' => { self.next_char(); return Ok(Symbols::Minus(pos_symb)); } 
+            '~' => { self.next_char(); return Ok(Symbols::Not(pos_symb)); }
+            '/' => { self.next_char(); return Ok(Symbols::Slash(pos_symb)); }
+            '=' => { self.next_char(); return Ok(Symbols::Equal(pos_symb)); }
+            ')' => { self.next_char(); return Ok(Symbols::RightParen(pos_symb)); }
+            '[' => { self.next_char(); return Ok(Symbols::LeftBracket(pos_symb)); }
+            ']' => { self.next_char(); return Ok(Symbols::RightBracket(pos_symb)); }
+            '{' => { self.next_char(); return Ok(Symbols::LeftCurly(pos_symb)); }
+            '}' => { self.next_char(); return Ok(Symbols::RightCurly(pos_symb)); }
+            '^' => { self.next_char(); return Ok(Symbols::Arrow(pos_symb)); }
+            '`' => { self.next_char(); return Ok(Symbols::Transpose(pos_symb)); }
+            ';' => { self.next_char(); return Ok(Symbols::SemiColon(pos_symb)); }
+            ':' => {
+                self.next_char();
+                if self.get_char() == '=' {
+                    self.next_char();
+                    return Ok(Symbols::Becomes(pos_symb));
+                }
+                return Ok(Symbols::Colon(pos_symb));
+            },
+            '<' => {
+                self.next_char();
+                if self.get_char() == '=' {
+                    self.next_char();
+                    return Ok(Symbols::LessEqual(pos_symb));
+                }
+                return Ok(Symbols::Less(pos_symb));
+            },
+            '>' => {
+                self.next_char();
+                if self.get_char() == '=' {
+                    self.next_char();
+                    return Ok(Symbols::GreaterEqual(pos_symb));
+                }
+                return Ok(Symbols::Greater(pos_symb));
+            },
+            '?' => {
+                self.next_char();
+                if self.get_char() == '?' {
+                    self.next_char();
+                    return Ok(Symbols::QuestionMarkQuestionMark(pos_symb));
+                }
+                return Ok(Symbols::QuestionMark(pos_symb));
+            },
+            '!' => {
+                self.next_char();
+                if self.get_char() == '!' {
+                    self.next_char();
+                    return Ok(Symbols::ExclamationMarkExclamationMark(pos_symb));
+                }
+                return Ok(Symbols::ExclamationMark(pos_symb));
+            },
+            '.' => {
+                self.next_char();
+                match self.get_char() {
+                    '.' => { self.next_char(); return Ok(Symbols::UpTo(pos_symb)); },
+                    '*' => { self.next_char(); return Ok(Symbols::DotMul(pos_symb)); },
+                    '/' => { self.next_char(); return Ok(Symbols::DotSlash(pos_symb)); },
+                    '=' => { self.next_char(); return Ok(Symbols::DotEqual(pos_symb)); },
+                    '#' => { self.next_char(); return Ok(Symbols::DotUnEqual(pos_symb)); },
+                    '>' => {
+                        self.next_char();
+                        if self.get_char() == '=' {
+                            self.next_char();
+                            return Ok(Symbols::DotGreaterEqual(pos_symb));
+                        }
+                        return Ok(Symbols::DotGreater(pos_symb));
+                    },
+                    '<' => {
+                        self.next_char();
+                        if self.get_char() == '=' {
+                            self.next_char();
+                            return Ok(Symbols::DotLessEqual(pos_symb));
+                        }
+                        return Ok(Symbols::DotLess(pos_symb));
+                    },
+                    _ => { return Ok(Symbols::Period(pos_symb)); }
+                }
+            },
+            _ => ()
+        }
 
         todo!();
+    }
+}
+
+
+#[cfg(test)]
+mod tests {
+
+    use crate::scanner::{Scanner, ScannerMethods, Symbols};
+
+    #[test]
+    fn operator_unequal() {
+        let mut lexer = Scanner::new(" #", false);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::UnEqual(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
     }
 }
