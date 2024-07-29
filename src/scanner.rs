@@ -321,6 +321,7 @@ impl ScannerMethods for Scanner {
         let pos_symb = self.position; /* Set start of symbol */
 
         match self.get_char() {
+            '\0' => { return Ok(Symbols::EndOfFile); }
             '#' => { self.next_char(); return Ok(Symbols::UnEqual(pos_symb)); }
             '*' => { self.next_char(); return Ok(Symbols::Mul(pos_symb)); }
             '+' => { self.next_char(); return Ok(Symbols::Plus(pos_symb)); }
@@ -528,6 +529,24 @@ mod tests {
                     Symbols::Ident(p, s) => {
                         assert_eq!(1, p);
                         assert_eq!(Box::new(String::from("Test11_1")), s);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn end_of_file() {
+        let mut lexer = Scanner::new("", false);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::EndOfFile => {
+                        assert!(true);    
                     },
                     _ => { assert!(false); }
                 }
