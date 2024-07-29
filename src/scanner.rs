@@ -126,7 +126,9 @@ pub enum Symbols {
     ExclamationMark(usize), // !
     ExclamationMarkExclamationMark(usize), // !!
     LessLess(usize), // <<
+    LessLessQ(usize), // <<?
     GreaterGreater(usize), // >>
+    GreaterGreaterQ(usize), // >>?
     GreatterGreaterQ(usize), // >>?
 
     /* Literals */
@@ -324,7 +326,7 @@ impl ScannerMethods for Scanner {
         match self.get_char() {
             '\0' => { return Ok(Symbols::EndOfFile); }
             '#' => { self.next_char(); return Ok(Symbols::UnEqual(pos_symb)); }
-            '+' => { self.next_char(); return Ok(Symbols::Plus(pos_symb)); }
+            '|' => { self.next_char(); return Ok(Symbols::Bar(pos_symb)); }
             ',' => { self.next_char(); return Ok(Symbols::Comma(pos_symb)); }
             '-' => { self.next_char(); return Ok(Symbols::Minus(pos_symb)); } 
             '~' => { self.next_char(); return Ok(Symbols::Not(pos_symb)); }
@@ -338,6 +340,15 @@ impl ScannerMethods for Scanner {
             '^' => { self.next_char(); return Ok(Symbols::Arrow(pos_symb)); }
             '`' => { self.next_char(); return Ok(Symbols::Transpose(pos_symb)); }
             ';' => { self.next_char(); return Ok(Symbols::SemiColon(pos_symb)); }
+            '&' => { self.next_char(); return Ok(Symbols::And(pos_symb)); }
+            '+' => { 
+                self.next_char(); 
+                if (self.get_char() == '*') { 
+                    self.next_char(); 
+                    return Ok(Symbols::PlusMul(pos_symb)); }
+                
+                return Ok(Symbols::Plus(pos_symb)); 
+            }
             '(' => {
                 self.next_char();
                 if self.get_char() == '*' {
@@ -392,6 +403,14 @@ impl ScannerMethods for Scanner {
                     self.next_char();
                     return Ok(Symbols::LessEqual(pos_symb));
                 }
+                else if self.get_char() == '<' {
+                    self.next_char();
+                    if self.get_char() == '?' {
+                        self.next_char();
+                        return Ok(Symbols::LessLessQ(pos_symb));
+                    }
+                    return Ok(Symbols::LessLess(pos_symb));
+                }
                 return Ok(Symbols::Less(pos_symb));
             },
             '>' => {
@@ -399,6 +418,14 @@ impl ScannerMethods for Scanner {
                 if self.get_char() == '=' {
                     self.next_char();
                     return Ok(Symbols::GreaterEqual(pos_symb));
+                }
+                else if self.get_char() == '>' {
+                    self.next_char();
+                    if self.get_char() == '?' {
+                        self.next_char();
+                        return Ok(Symbols::GreaterGreaterQ(pos_symb));
+                    }
+                    return Ok(Symbols::GreaterGreater(pos_symb));
                 }
                 return Ok(Symbols::Greater(pos_symb));
             },
@@ -621,6 +648,738 @@ mod tests {
             _ => { assert!(false); }
         }
     }
+
+
+    #[test]
+    fn operator_equal() {
+        let mut lexer = Scanner::new(" =", false);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::Equal(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn operator_greater() {
+        let mut lexer = Scanner::new(" >", false);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::Greater(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn operator_greater_equal() {
+        let mut lexer = Scanner::new(" >=", false);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::GreaterEqual(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn operator_less() {
+        let mut lexer = Scanner::new(" <", false);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::Less(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn operator_less_equal() {
+        let mut lexer = Scanner::new(" <=", false);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::LessEqual(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn operator_period() {
+        let mut lexer = Scanner::new(" .", false);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::Period(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn operator_upto() {
+        let mut lexer = Scanner::new(" ..", false);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::UpTo(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn operator_dot_less_equal() {
+        let mut lexer = Scanner::new(" .<=", false);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::DotLessEqual(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn operator_dot_less() {
+        let mut lexer = Scanner::new(" .<", false);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::DotLess(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn operator_dot_greater_equal() {
+        let mut lexer = Scanner::new(" .>=", false);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::DotGreaterEqual(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn operator_dot_greater() {
+        let mut lexer = Scanner::new(" .>", false);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::DotGreater(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn operator_dot_equal() {
+        let mut lexer = Scanner::new(" .=", false);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::DotEqual(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn operator_dot_unequal() {
+        let mut lexer = Scanner::new(" .#", false);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::DotUnEqual(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn operator_becomes() {
+        let mut lexer = Scanner::new(" :=", false);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::Becomes(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn operator_colon() {
+        let mut lexer = Scanner::new(" :", false);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::Colon(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn operator_semicolon() {
+        let mut lexer = Scanner::new(" ;", false);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::SemiColon(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn operator_power() {
+        let mut lexer = Scanner::new(" **", false);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::Power(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn operator_mul() {
+        let mut lexer = Scanner::new(" *", false);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::Mul(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn operator_plus() {
+        let mut lexer = Scanner::new(" +", false);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::Plus(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn operator_plus_mul() {
+        let mut lexer = Scanner::new(" +*", false);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::PlusMul(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn operator_exclamatuinmark() {
+        let mut lexer = Scanner::new(" !", false);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::ExclamationMark(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn operator_exlamationmark_explarationmark() {
+        let mut lexer = Scanner::new(" !!", false);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::ExclamationMarkExclamationMark(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn operator_questionmark() {
+        let mut lexer = Scanner::new(" ?", false);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::QuestionMark(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn operator_questionmark_questionmark() {
+        let mut lexer = Scanner::new(" ??", false);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::QuestionMarkQuestionMark(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn operator_arrow() {
+        let mut lexer = Scanner::new(" ^", false);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::Arrow(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn operator_bar() {
+        let mut lexer = Scanner::new(" |", false);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::Bar(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn operator_not() {
+        let mut lexer = Scanner::new(" ~", false);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::Not(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn operator_minus() {
+        let mut lexer = Scanner::new(" -", false);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::Minus(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn operator_backquote() {
+        let mut lexer = Scanner::new(" `", false);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::Transpose(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn operator_and() {
+        let mut lexer = Scanner::new(" &", false);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::And(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn operator_less_less() {
+        let mut lexer = Scanner::new(" <<", false);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::LessLess(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn operator_less_less_q() {
+        let mut lexer = Scanner::new(" <<?", false);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::LessLessQ(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn operator_greater_greater() {
+        let mut lexer = Scanner::new(" >>", false);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::GreaterGreater(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn operator_greater_greater_q() {
+        let mut lexer = Scanner::new(" >>?", false);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::GreaterGreaterQ(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn operator_left_paren() {
+        let mut lexer = Scanner::new(" (", false);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::LeftParen(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn operator_right_paren() {
+        let mut lexer = Scanner::new(" )", false);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::RightParen(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn operator_left_bracket() {
+        let mut lexer = Scanner::new(" [", false);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::LeftBracket(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn operator_right_bracket() {
+        let mut lexer = Scanner::new(" ]", false);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::RightBracket(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn operator_left_curly() {
+        let mut lexer = Scanner::new(" {", false);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::LeftCurly(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn operator_right_curly() {
+        let mut lexer = Scanner::new(" }", false);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::RightCurly(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    
+
+    
+
+
+
+
+
+
+
 
     #[test]
     fn strict_keyword_await() {
