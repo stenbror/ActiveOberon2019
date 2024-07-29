@@ -29,6 +29,7 @@ enum Symbols {
     Cell(usize),
     CellNet(usize),
     Code(usize),
+    CodeText(usize, Box<String>),
     Definition(usize),
     Do(usize),
     Div(usize),
@@ -323,7 +324,6 @@ impl ScannerMethods for Scanner {
         match self.get_char() {
             '\0' => { return Ok(Symbols::EndOfFile); }
             '#' => { self.next_char(); return Ok(Symbols::UnEqual(pos_symb)); }
-            '*' => { self.next_char(); return Ok(Symbols::Mul(pos_symb)); }
             '+' => { self.next_char(); return Ok(Symbols::Plus(pos_symb)); }
             ',' => { self.next_char(); return Ok(Symbols::Comma(pos_symb)); }
             '-' => { self.next_char(); return Ok(Symbols::Minus(pos_symb)); } 
@@ -338,6 +338,38 @@ impl ScannerMethods for Scanner {
             '^' => { self.next_char(); return Ok(Symbols::Arrow(pos_symb)); }
             '`' => { self.next_char(); return Ok(Symbols::Transpose(pos_symb)); }
             ';' => { self.next_char(); return Ok(Symbols::SemiColon(pos_symb)); }
+            '(' => {
+                self.next_char();
+                if self.get_char() == '*' {
+                    self.next_char();
+                    let mut level = 1;
+                    loop {
+                        match self.get_char() {
+                            '*' => {
+                                self.next_char();
+                                if self.get_char() == ')' {
+                                    self.next_char();
+                                    level = level - 1;
+                                }
+                            },
+                            '(' => {
+                                self.next_char();
+                                if self.get_char() == '*' {
+                                    self.next_char();
+                                    level = level + 1;
+                                }
+                            },
+                            '\0' => {
+                                return Err((Box::new(String::from("Unterminated comment in source code. Missing '*)'")), self.position, self.lineno));
+                            }, _ => {
+                                self.next_char();
+                            }
+                        }
+                        if level == 0 { return self.get_next_symbol(); }
+                    }
+                }
+                return Ok(Symbols::LeftParen(pos_symb));
+            },
             ':' => {
                 self.next_char();
                 if self.get_char() == '=' {
@@ -345,6 +377,14 @@ impl ScannerMethods for Scanner {
                     return Ok(Symbols::Becomes(pos_symb));
                 }
                 return Ok(Symbols::Colon(pos_symb));
+            },
+            '*' => {
+                self.next_char();
+                if self.get_char() == '*' {
+                    self.next_char();
+                    return Ok(Symbols::Power(pos_symb));
+                }
+                return Ok(Symbols::Mul(pos_symb));
             },
             '<' => {
                 self.next_char();
@@ -378,6 +418,15 @@ impl ScannerMethods for Scanner {
                 }
                 return Ok(Symbols::ExclamationMark(pos_symb));
             },
+            '\\' => {
+                self.next_char();
+                if self.get_char() == '"' {
+                    todo!()
+                } // else if ch > ' ' and peek = '"'
+                else {
+                    return Ok(Symbols::BackSlash(pos_symb));
+                }
+            },
             '.' => {
                 self.next_char();
                 match self.get_char() {
@@ -405,6 +454,15 @@ impl ScannerMethods for Scanner {
                     _ => { return Ok(Symbols::Period(pos_symb)); }
                 }
             },
+            '0' | '1' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' => {
+                todo!()
+            } ,
+            '"' => {
+                todo!()
+            },
+            '\'' => {
+                todo!()
+            },
             _ => {
 
                 /* Handling identifier or reserved keyword */
@@ -425,7 +483,34 @@ impl ScannerMethods for Scanner {
                         let symb = self.is_capitalize_reserved_keyword(buffer.as_str(), pos_symb);
 
                         match symb {
-                            Some(s) => { return Ok(s); },
+                            Some(s) => { 
+                                match s {
+                                    Symbols::Code(p) => { /* Collect all until 'END' is found */
+                                        let mut asm_text = std::string::String::new();
+
+                                        loop {
+                                            if self.get_char() == 'E' {
+                                                let pos_local = self.position;
+                                                if self.get_char() == 'N' {
+                                                    self.next_char();
+                                                    if self.get_char() == 'D' {
+                                                        self.next_char();
+
+                                                        return Ok(Symbols::CodeText(pos_symb, Box::new(asm_text)));
+                                                    }
+                                                }
+                                                self.position = pos_local;
+                                            }
+                                            if self.get_char() == '\0' { return Err((Box::new(String::from("Unterminated code block in source code. Missing 'END'")), self.position, self.lineno)); }
+                                            asm_text.push(self.get_char());
+                                            self.next_char();
+                                        }
+                                    }, 
+                                    _ => ()
+                                }
+                                
+                                return Ok(s); 
+                            },
                             _ => {
                                 return Ok(Symbols::Ident(pos_symb, Box::new(buffer)))
                             } 
@@ -440,7 +525,34 @@ impl ScannerMethods for Scanner {
                             let symb2 = self.is_capitalize_reserved_keyword(buffer.as_str(), pos_symb);
 
                             match symb2 {
-                                Some(s) => { return Ok(s); },
+                                Some(s) => { 
+                                    match s {
+                                        Symbols::Code(p) => { /* Collect all until 'END' or 'end' is found */
+                                            let mut asm_text = std::string::String::new();
+
+                                            loop {
+                                                if self.get_char() == 'E' || self.get_char() == 'e' {
+                                                    let pos_local = self.position;
+                                                    if self.get_char() == 'N' || self.get_char() == 'n' {
+                                                        self.next_char();
+                                                        if self.get_char() == 'D' || self.get_char() == 'd' {
+                                                            self.next_char();
+    
+                                                            return Ok(Symbols::CodeText(pos_symb, Box::new(asm_text)));
+                                                        }
+                                                    }
+                                                    self.position = pos_local;
+                                                }
+                                                if self.get_char() == '\0' { return Err((Box::new(String::from("Unterminated code block in source code. Missing 'END'")), self.position, self.lineno)); }
+                                                asm_text.push(self.get_char());
+                                                self.next_char();
+                                            }
+                                        }, 
+                                        _ => ()
+                                    }
+                                    
+                                    return Ok(s); 
+                                },
                                 _ => {
                                     return Ok(Symbols::Ident(pos_symb, Box::new(buffer)))
                                 } 
@@ -540,6 +652,24 @@ mod tests {
     #[test]
     fn end_of_file() {
         let mut lexer = Scanner::new("", false);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::EndOfFile => {
+                        assert!(true);    
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn comment_only() {
+        let mut lexer = Scanner::new("(* This is a (* test *) in Active Oberon with two levels *)", false);
         let symb = lexer.get_next_symbol();
 
         match symb {
