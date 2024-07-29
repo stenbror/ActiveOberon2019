@@ -1,119 +1,138 @@
+
+/*
+scanner reflects the following EBNF
+		Symbol 				= String | Token | Number | Keyword | Identifier.
+		Token 				=  | '#' | '&' | '(' ['*' any '*' ')'] | ')' | '*'['*'] | '+'['*'] | ',' | '-' | '.' [ '.' | '*' | '/' | '=' | '#' | '>'['='] | '<' ['=']
+											  | '/' | ':' ['='] | ';'  | '<' ['=' | '<' ['?'] ] | '=' | '>' [ '=' | '>' ['?']]  
+											  | '[' | ']' | '^' | '{' | '|' | '}' | '~' | '\' |  '`' |  '?' ['?'] | '!' ['!']
+		Identifier			= Letter {Letter | Digit | '_'}.
+		Letter					= 'A' | 'B' | .. | 'Z' | 'a' | 'b' | .. | 'z'.
+		Digit						= '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' .
+		String					= '"' {Character} '"' | "'" {Character} "'".
+		Character			= Digit [HexDigit] 'X'.
+		Number				= Integer | Real.
+		Integer				= Digit {Digit} | Digit {HexDigit} 'H' | '0x' {HexDigit}.
+		Real						= Digit {Digit} '.' {Digit} [ScaleFactor].
+		ScaleFactor		= ('E' | 'D') ['+' | '-'] digit {digit}.
+		HexDigit			= Digit | 'A' | 'B' | 'C' | 'D' | 'E' | 'F'.
+*/
+
 #[derive(Clone, PartialEq, Debug)]
 enum Symbols {
 
     /* Reserved keywords */
-    Await(u32),
-    Begin(u32),
-    By(u32),
-    Const(u32),
-    Case(u32),
-    Cell(u32),
-    CellNet(u32),
-    Code(u32),
-    Definition(u32),
-    Do(u32),
-    Div(u32),
-    End(u32),
-    Enum(u32),
-    Else(u32),
-    Elsif(u32),
-    Exit(u32),
-    Extern(u32),
-    False(u32),
-    For(u32),
-    Finally(u32),
-    If(u32),
-    Ignore(u32),
-    Imag(u32),
-    In(u32),
-    Is(u32),
-    Import(u32),
-    Loop(u32),
-    Module(u32),
-    Mod(u32),
-    Nil(u32),
-    Of(u32),
-    Or(u32),
-    Out(u32),
-    Operator(u32),
-    Procedure(u32),
-    Port(u32),
-    Repeat(u32),
-    Return(u32),
-    _Self(u32),
-    New(u32),
-    Result(u32),
-    Then(u32),
-    True(u32),
-    To(u32),
-    Type(u32),
-    Until(u32),
-    Var(u32),
-    While(u32),
-    With(u32),
+    Await(usize),
+    Begin(usize),
+    By(usize),
+    Const(usize),
+    Case(usize),
+    Cell(usize),
+    CellNet(usize),
+    Code(usize),
+    Definition(usize),
+    Do(usize),
+    Div(usize),
+    End(usize),
+    Enum(usize),
+    Else(usize),
+    Elsif(usize),
+    Exit(usize),
+    Extern(usize),
+    False(usize),
+    For(usize),
+    Finally(usize),
+    If(usize),
+    Ignore(usize),
+    Imag(usize),
+    In(usize),
+    Is(usize),
+    Import(usize),
+    Loop(usize),
+    Module(usize),
+    Mod(usize),
+    Nil(usize),
+    Of(usize),
+    Or(usize),
+    Out(usize),
+    Operator(usize),
+    Procedure(usize),
+    Port(usize),
+    Repeat(usize),
+    Return(usize),
+    _Self(usize),
+    New(usize),
+    Result(usize),
+    Then(usize),
+    True(usize),
+    To(usize),
+    Type(usize),
+    Until(usize),
+    Var(usize),
+    While(usize),
+    With(usize),
 
     /* Types */
-    Any(u32),
-    Array(u32),
-    Object(u32),
-    Pointer(u32),
-    Record(u32),
-    Address(u32),
-    Size(u32),
-    Alias(u32),
+    Any(usize),
+    Array(usize),
+    Object(usize),
+    Pointer(usize),
+    Record(usize),
+    Address(usize),
+    Size(usize),
+    Alias(usize),
 
     /* Operators or delimiters */
-    NotEqual(u32), // #
-    And(u32), // &
-    LeftParen(u32), // (
-    RightParen(u32), // )
-    Mul(u32), // *
-    Power(u32), // **
-    Plus(u32), // +
-    PlusMul(u32), // +*
-    Comma(u32), // ,
-    Minus(u32), // -
-    Period(u32), // .
-    UpTo(u32), // ..
-    DotMul(u32), // .*
-    DotSlash(u32), // ./
-    DotEqual(u32), // .=
-    DotUnEqual(u32), // .#
-    DotGreater(u32), // .>
-    DotGreaterEqual(u32), // .>=
-    DotLess(u32), // .<
-    DotLessEqual(u32), // .<=
-    Slash(u32), // /
-    Colon(u32), // :
-    Becomes(u32), // :=
-    SemiColon(u32), // ;
-    Less(u32), // <
-    LessEqual(u32), // <=
-    Equal(u32), // =
-    Greater(u32), // >
-    GreaterEqual(u32), // >=
-    LeftBracket(u32), // [
-    RightBracket(u32), // ]
-    Bar(u32), // |
-    Arrow(u32), // ^
-    LeftCurly(u32), // {
-    RightCurly(u32), // }
-    BackSlash(u32), // \
-    Not(u32), // ~
-    Transpose(u32), // `
-    QuestionMark(u32), // ?
-    QuestionMarkQuestionMark(u32), // ??
-    ExclamationMark(u32), // !
-    ExclamationMarkExclamationMark(u32), // !!
-    LessLess(u32), // <<
-    GreaterGreater(u32), // >>
-    GreatterGreaterQ(u32), // >>?
+    NotEqual(usize), // #
+    And(usize), // &
+    LeftParen(usize), // (
+    RightParen(usize), // )
+    Mul(usize), // *
+    Power(usize), // **
+    Plus(usize), // +
+    PlusMul(usize), // +*
+    Comma(usize), // ,
+    Minus(usize), // -
+    Period(usize), // .
+    UpTo(usize), // ..
+    DotMul(usize), // .*
+    DotSlash(usize), // ./
+    DotEqual(usize), // .=
+    DotUnEqual(usize), // .#
+    DotGreater(usize), // .>
+    DotGreaterEqual(usize), // .>=
+    DotLess(usize), // .<
+    DotLessEqual(usize), // .<=
+    Slash(usize), // /
+    Colon(usize), // :
+    Becomes(usize), // :=
+    SemiColon(usize), // ;
+    Less(usize), // <
+    LessEqual(usize), // <=
+    Equal(usize), // =
+    Greater(usize), // >
+    GreaterEqual(usize), // >=
+    LeftBracket(usize), // [
+    RightBracket(usize), // ]
+    Bar(usize), // |
+    Arrow(usize), // ^
+    LeftCurly(usize), // {
+    RightCurly(usize), // }
+    BackSlash(usize), // \
+    Not(usize), // ~
+    Transpose(usize), // `
+    QuestionMark(usize), // ?
+    QuestionMarkQuestionMark(usize), // ??
+    ExclamationMark(usize), // !
+    ExclamationMarkExclamationMark(usize), // !!
+    LessLess(usize), // <<
+    GreaterGreater(usize), // >>
+    GreatterGreaterQ(usize), // >>?
 
     /* Literals */
-    Ident(u32, Box<str>),
-    Number(u32),
-    String(u32, Box<str>),
-    Char(u32),
+    Ident(usize, Box<str>),
+    Number(usize),
+    String(usize, Box<str>),
+    Char(usize),
 
     /* System */
     EndOfFile
@@ -121,16 +140,17 @@ enum Symbols {
 
 pub trait ScannerMethods {
     fn new(text: &'static str) -> Self;
-    fn getChar(&self) -> char;
-    fn nextChar(&mut self) -> ();
+    fn get_char(&mut self) -> char;
+    fn next_char(&mut self) -> ();
+    fn get_next_symbol(&mut self) -> Result<Symbols, (Box<std::string::String>, usize, usize)>;
 }
 
 
 
 pub struct Scanner {
     source: Vec<char>,
-    position: u32,
-    lineno: u32,
+    position: usize,
+    lineno: usize,
 }
 
 impl ScannerMethods for Scanner {
@@ -144,11 +164,35 @@ impl ScannerMethods for Scanner {
         }
     }
 
-    fn getChar(&self) -> char {
-        ' '
+    fn get_char(&mut self) -> char {
+        if self.position >= self.source.len() { return '\0'; } 
+        let ch = self.source[self.position];
+        if ch == '\r' || ch == '\n' { /* Handle lineshift and increment lineno */
+            if ch == '\n' {
+                self.lineno = self.lineno + 1;
+                self.next_char();
+                return self.get_char();
+            }
+            else {
+                self.lineno = self.lineno + 1;
+                self.next_char();
+                if self.position >= self.source.len() { return '\0'; } 
+                let ch2 = self.source[self.position];
+                if ch2 == '\n' {
+                    self.next_char();
+                }
+                return self.get_char();
+            }
+        }
+        return ch;
     }
 
-    fn nextChar(&mut self) -> () {
+    fn next_char(&mut self) -> () {
         self.position = self.position + 1
+    }
+
+    fn get_next_symbol(&mut self) -> Result<Symbols, (Box<std::string::String>, usize, usize)> {
+
+        todo!();
     }
 }
