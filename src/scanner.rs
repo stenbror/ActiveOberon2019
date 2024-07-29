@@ -18,7 +18,7 @@ scanner reflects the following EBNF
 */
 
 #[derive(Clone, PartialEq, Debug)]
-enum Symbols {
+pub enum Symbols {
 
     /* Reserved keywords */
     Await(usize),
@@ -490,16 +490,16 @@ impl ScannerMethods for Scanner {
 
                                         loop {
                                             if self.get_char() == 'E' {
-                                                let pos_local = self.position;
+                                                self.next_char();
                                                 if self.get_char() == 'N' {
                                                     self.next_char();
                                                     if self.get_char() == 'D' {
                                                         self.next_char();
+                                                        self.position = self.position - 3;
 
                                                         return Ok(Symbols::CodeText(pos_symb, Box::new(asm_text)));
                                                     }
                                                 }
-                                                self.position = pos_local;
                                             }
                                             if self.get_char() == '\0' { return Err((Box::new(String::from("Unterminated code block in source code. Missing 'END'")), self.position, self.lineno)); }
                                             asm_text.push(self.get_char());
@@ -519,7 +519,35 @@ impl ScannerMethods for Scanner {
 
                     let symb1 = self.is_reserved_keyword(buffer.as_str(), pos_symb);
                     match symb1 {
-                        Some(s) => { return Ok(s); },
+                        Some(s) => {
+                            match s {
+                                Symbols::Code(p) => { /* Collect all until 'END' or 'end' is found */
+                                    let mut asm_text = std::string::String::new();
+
+                                    loop {
+                                        if self.get_char() == 'e' {
+                                            self.next_char();
+                                            if self.get_char() == 'n' {
+                                                self.next_char();
+                                                if self.get_char() == 'd' {
+                                                    self.next_char();
+                                                    self.position = self.position - 3;
+
+                                                    return Ok(Symbols::CodeText(pos_symb, Box::new(asm_text)));
+                                                }
+                                            }
+                                        }
+                                        if self.get_char() == '\0' { return Err((Box::new(String::from("Unterminated code block in source code. Missing 'END'")), self.position, self.lineno)); }
+                                        asm_text.push(self.get_char());
+                                        self.next_char();
+                                    }
+                                },
+                                _ => ()
+                            }
+
+                            return Ok(s);
+
+                        },
                         _ => {
                            
                             let symb2 = self.is_capitalize_reserved_keyword(buffer.as_str(), pos_symb);
@@ -531,17 +559,17 @@ impl ScannerMethods for Scanner {
                                             let mut asm_text = std::string::String::new();
 
                                             loop {
-                                                if self.get_char() == 'E' || self.get_char() == 'e' {
-                                                    let pos_local = self.position;
-                                                    if self.get_char() == 'N' || self.get_char() == 'n' {
+                                                if self.get_char() == 'E' {
+                                                    self.next_char();
+                                                    if self.get_char() == 'N' {
                                                         self.next_char();
-                                                        if self.get_char() == 'D' || self.get_char() == 'd' {
+                                                        if self.get_char() == 'D' {
                                                             self.next_char();
+                                                            self.position = self.position - 3;
     
                                                             return Ok(Symbols::CodeText(pos_symb, Box::new(asm_text)));
                                                         }
                                                     }
-                                                    self.position = pos_local;
                                                 }
                                                 if self.get_char() == '\0' { return Err((Box::new(String::from("Unterminated code block in source code. Missing 'END'")), self.position, self.lineno)); }
                                                 asm_text.push(self.get_char());
@@ -677,6 +705,70 @@ mod tests {
                 match x {
                     Symbols::EndOfFile => {
                         assert!(true);    
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn strict_code_block() {
+        let mut lexer = Scanner::new("CODE asembler code is here! END", true);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::CodeText(p, s) => {
+                        assert!(true);    
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+
+        let symb2 = lexer.get_next_symbol();
+
+        match symb2 {
+            Ok(x) => {
+                match x {
+                    Symbols::End(p) => {
+                        assert!(true);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn code_block() {
+        let mut lexer = Scanner::new("code asembler code is here! end", false);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::CodeText(p, s) => {
+                        assert!(true);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+
+        let symb2 = lexer.get_next_symbol();
+
+        match symb2 {
+            Ok(x) => {
+                match x {
+                    Symbols::End(p) => {
+                        assert!(true);
                     },
                     _ => { assert!(false); }
                 }
