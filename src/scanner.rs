@@ -96,6 +96,7 @@ pub enum Symbols {
     Period(usize), // .
     UpTo(usize), // ..
     DotMul(usize), // .*
+    DotPlus(usize), // .+
     DotSlash(usize), // ./
     DotEqual(usize), // .=
     DotUnEqual(usize), // .#
@@ -458,6 +459,7 @@ impl ScannerMethods for Scanner {
                 self.next_char();
                 match self.get_char() {
                     '.' => { self.next_char(); return Ok(Symbols::UpTo(pos_symb)); },
+                    '+' => { self.next_char(); return Ok(Symbols::DotPlus(pos_symb)); },
                     '*' => { self.next_char(); return Ok(Symbols::DotMul(pos_symb)); },
                     '/' => { self.next_char(); return Ok(Symbols::DotSlash(pos_symb)); },
                     '=' => { self.next_char(); return Ok(Symbols::DotEqual(pos_symb)); },
@@ -875,6 +877,42 @@ mod tests {
             Ok(x) => {
                 match x {
                     Symbols::DotUnEqual(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn operator_dot_mul() {
+        let mut lexer = Scanner::new(" .*", false);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::DotMul(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn operator_dot_plus() {
+        let mut lexer = Scanner::new(" .+", false);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::DotPlus(p) => {
                         assert_eq!(1, p);
                     },
                     _ => { assert!(false); }
@@ -1369,6 +1407,9 @@ mod tests {
             _ => { assert!(false); }
         }
     }
+
+
+    
 
     
 
