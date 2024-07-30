@@ -1,5 +1,10 @@
 # Active Oberon Compiler project (2019 Standard)
 
+This is the start of a project to build a native active Oberon 2019 compiler with inline assembler, written in Rust.
+
+- cargo build
+- cargo test
+- cargo run
 
 ## Reserved keywords
 
@@ -25,10 +30,14 @@
 | record | return | result | self | then | true | to | type | 
 | until | var | while | with |
 
+## Operators or delimiters
 
 ||||||||||||
 |-|-|-|-|-|-|-|-|-|-|-|
 | < | <= | = | >= | > | # | := | : | ; | .. | . | , |
+| + | +* | - | ^ | & | ? | ?? | ! | !! | << | >> | <<? |
+| >>? | .< | .<= | .>= | .> | .+ | .* | .= | .# | ~ | 
+| \ | ´ | 
 
 
 
