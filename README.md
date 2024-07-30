@@ -18,7 +18,7 @@ This is the start of a project to build a native active Oberon 2019 compiler wit
 | RECORD | RETURN | RESULT | SELF | THEN | TRUE | TO | TYPE | 
 | UNTIL | VAR | WHILE | WITH |
 
-**If you don't use strict mode, lower case keywords is allowed also** 
+**If you don't use strict mode, lower case keywords is also allowed** 
 
 | | | | | | | | |
 |----|-----|-----|-----|-----|-----|------|------|
