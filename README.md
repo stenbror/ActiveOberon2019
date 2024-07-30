@@ -3,6 +3,7 @@
 
 ## Reserved keywords
 
+|----|-----|-----|-----|-----|-----|------|------|-------|--------|
 | ADDRESS | ALIAS | ARRAY | AWAIT | BEGIN | BY | CELL | CELLNET | CASE | CODE |
 | DEFINITION | DO | DIV | END | ENUM | ELSE | ELSIF | EXIT | EXTERN | FALSE |
 | FOR | FINALLY | IF | IMAG | IN | IS | IMPORT | LOOP | MODULE | MOD |
