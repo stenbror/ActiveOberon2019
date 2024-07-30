@@ -41,8 +41,8 @@ This is the start of a project to build a native active Oberon 2019 compiler wit
 
 ## Reserved procedures and data types
 
-| | | | | | | | |
-|----|-----|-----|-----|-----|-----|------|------|
+| | | | | | | |
+|----|-----|-----|-----|-----|-----|------|
 | ABS | ADDRESS | ADDRESSOF | ALL | ANY | ASH | ASSERT |
 | BOOLEAN | CAP | CAS | CHAR | CHR | COMPLEX | COMPLEX32 |
 | COMPLEX64 | COPY | DEC | DECMUL | DIM | ENTIER | ENTIERH |
