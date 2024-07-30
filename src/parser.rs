@@ -18,6 +18,28 @@ pub enum SyntaxNode {
     BackSlash(usize, Rc<SyntaxNode>, Rc<SyntaxNode>),
     Power(usize, Rc<SyntaxNode>, Rc<SyntaxNode>),
     PlusMul(usize, Rc<SyntaxNode>, Rc<SyntaxNode>),
+    Plus(usize, Rc<SyntaxNode>, Rc<SyntaxNode>),
+    Minus(usize, Rc<SyntaxNode>, Rc<SyntaxNode>),
+    Or(usize, Rc<SyntaxNode>, Rc<SyntaxNode>),
+
+    Equal(usize, Rc<SyntaxNode>, Rc<SyntaxNode>),
+    UnEqual(usize, Rc<SyntaxNode>, Rc<SyntaxNode>),
+    Less(usize, Rc<SyntaxNode>, Rc<SyntaxNode>),
+    LessEqual(usize, Rc<SyntaxNode>, Rc<SyntaxNode>),
+    Greater(usize, Rc<SyntaxNode>, Rc<SyntaxNode>),
+    GreaterEqual(usize, Rc<SyntaxNode>, Rc<SyntaxNode>),
+    In(usize, Rc<SyntaxNode>, Rc<SyntaxNode>),
+    Is(usize, Rc<SyntaxNode>, Rc<SyntaxNode>),
+    DotEqual(usize, Rc<SyntaxNode>, Rc<SyntaxNode>),
+    DotUnEqual(usize, Rc<SyntaxNode>, Rc<SyntaxNode>),
+    DotLess(usize, Rc<SyntaxNode>, Rc<SyntaxNode>),
+    DotLessEqual(usize, Rc<SyntaxNode>, Rc<SyntaxNode>),
+    DotGreater(usize, Rc<SyntaxNode>, Rc<SyntaxNode>),
+    DotGreaterEqual(usize, Rc<SyntaxNode>, Rc<SyntaxNode>),
+    QuestionMarkQuestionMark(usize, Rc<SyntaxNode>, Rc<SyntaxNode>),
+    ExclamationMarkExclamationMark(usize, Rc<SyntaxNode>, Rc<SyntaxNode>),
+    LessLessQ(usize, Rc<SyntaxNode>, Rc<SyntaxNode>),
+    GreaterGreaterQ(usize, Rc<SyntaxNode>, Rc<SyntaxNode>),
 }
 
 pub trait ParseMethods {
@@ -139,7 +161,28 @@ impl ParseMethods for Parser {
     }
 
     fn parse_simple_expression(&mut self) -> Result<SyntaxNode, (Box<std::string::String>, usize, usize)> {
-        todo!()
+        let mut left = self.parse_term()?;
+        loop {
+            match &self.symbol.clone()? {
+                Symbols::Plus(p) => {
+                    self.advance();
+                    let right = self.parse_term()?;
+                    left = SyntaxNode::Plus(p.clone(), left.into(), right.into());
+                },
+                Symbols::Minus(p) => {
+                    self.advance();
+                    let right = self.parse_term()?;
+                    left = SyntaxNode::Minus(p.clone(), left.into(), right.into());
+                },
+                Symbols::Or(p) => {
+                    self.advance();
+                    let right = self.parse_term()?;
+                    left = SyntaxNode::Or(p.clone(), left.into(), right.into());
+                },
+                _=> break
+            }
+        }
+        return Ok(left);
     }
 
     fn parse_range_expression(&mut self) -> Result<SyntaxNode, (Box<std::string::String>, usize, usize)> {
@@ -147,6 +190,99 @@ impl ParseMethods for Parser {
     }
 
     fn parse_expression(&mut self) -> Result<SyntaxNode, (Box<std::string::String>, usize, usize)> {
-        todo!()
+        let mut left = self.parse_range_expression()?;
+        match &self.symbol.clone()? {
+            Symbols::Equal(p) => {
+                self.advance();
+                let right = self.parse_range_expression()?;
+                return Ok(SyntaxNode::Equal(p.clone(), left.into(), right.into()));
+            },
+            Symbols::UnEqual(p) => {
+                self.advance();
+                let right = self.parse_range_expression()?;
+                return Ok(SyntaxNode::UnEqual(p.clone(), left.into(), right.into()));
+            },
+            Symbols::Less(p) => {
+                self.advance();
+                let right = self.parse_range_expression()?;
+                return Ok(SyntaxNode::Less(p.clone(), left.into(), right.into()));
+            },
+            Symbols::LessEqual(p) => {
+                self.advance();
+                let right = self.parse_range_expression()?;
+                return Ok(SyntaxNode::LessEqual(p.clone(), left.into(), right.into()));
+            },
+            Symbols::Greater(p) => {
+                self.advance();
+                let right = self.parse_range_expression()?;
+                return Ok(SyntaxNode::Greater(p.clone(), left.into(), right.into()));
+            },
+            Symbols::GreaterEqual(p) => {
+                self.advance();
+                let right = self.parse_range_expression()?;
+                return Ok(SyntaxNode::GreaterEqual(p.clone(), left.into(), right.into()));
+            },
+            Symbols::In(p) => {
+                self.advance();
+                let right = self.parse_range_expression()?;
+                return Ok(SyntaxNode::In(p.clone(), left.into(), right.into()));
+            },
+            Symbols::Is(p) => {
+                self.advance();
+                let right = self.parse_range_expression()?;
+                return Ok(SyntaxNode::Is(p.clone(), left.into(), right.into()));
+            },
+            Symbols::DotEqual(p) => {
+                self.advance();
+                let right = self.parse_range_expression()?;
+                return Ok(SyntaxNode::DotEqual(p.clone(), left.into(), right.into()));
+            },
+            Symbols::DotUnEqual(p) => {
+                self.advance();
+                let right = self.parse_range_expression()?;
+                return Ok(SyntaxNode::DotUnEqual(p.clone(), left.into(), right.into()));
+            },
+            Symbols::DotLess(p) => {
+                self.advance();
+                let right = self.parse_range_expression()?;
+                return Ok(SyntaxNode::DotLess(p.clone(), left.into(), right.into()));
+            },
+            Symbols::DotLessEqual(p) => {
+                self.advance();
+                let right = self.parse_range_expression()?;
+                return Ok(SyntaxNode::DotLessEqual(p.clone(), left.into(), right.into()));
+            },
+            Symbols::DotGreater(p) => {
+                self.advance();
+                let right = self.parse_range_expression()?;
+                return Ok(SyntaxNode::DotGreater(p.clone(), left.into(), right.into()));
+            },
+            Symbols::DotGreaterEqual(p) => {
+                self.advance();
+                let right = self.parse_range_expression()?;
+                return Ok(SyntaxNode::DotGreaterEqual(p.clone(), left.into(), right.into()));
+            },
+            Symbols::QuestionMarkQuestionMark(p) => {
+                self.advance();
+                let right = self.parse_range_expression()?;
+                return Ok(SyntaxNode::QuestionMarkQuestionMark(p.clone(), left.into(), right.into()));
+            },
+            Symbols::ExclamationMarkExclamationMark(p) => {
+                self.advance();
+                let right = self.parse_range_expression()?;
+                return Ok(SyntaxNode::ExclamationMarkExclamationMark(p.clone(), left.into(), right.into()));
+            },
+            Symbols::LessLessQ(p) => {
+                self.advance();
+                let right = self.parse_range_expression()?;
+                return Ok(SyntaxNode::LessLessQ(p.clone(), left.into(), right.into()));
+            },
+            Symbols::GreaterGreaterQ(p) => {
+                self.advance();
+                let right = self.parse_range_expression()?;
+                return Ok(SyntaxNode::GreaterGreaterQ(p.clone(), left.into(), right.into()));
+            },
+            _ => { return Ok(left); }
+        }
     }
 }
