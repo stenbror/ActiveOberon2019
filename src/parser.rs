@@ -5,6 +5,9 @@ use std::rc::Rc;
 pub enum SyntaxNode {
     None,
 
+    UnaryPlus(usize, Rc<SyntaxNode>),
+    UnaryMinus(usize, Rc<SyntaxNode>),
+    Not(usize, Rc<SyntaxNode>),
     Mul(usize, Rc<SyntaxNode>, Rc<SyntaxNode>),
     Slash(usize, Rc<SyntaxNode>, Rc<SyntaxNode>),
     Div(usize, Rc<SyntaxNode>, Rc<SyntaxNode>),
@@ -57,7 +60,21 @@ impl ParseMethods for Parser {
     }
 
     fn parse_factor(&mut self) -> Result<SyntaxNode, (Box<std::string::String>, usize, usize)> {
-        todo!()
+        match &self.symbol.clone()? {
+            Symbols::Plus(p) => {
+                let right = self.parse_unary_expression()?;
+                return Ok(SyntaxNode::UnaryPlus(p.clone(), right.into()));
+            },
+            Symbols::Minus(p) => {
+                let right = self.parse_unary_expression()?;
+                return Ok(SyntaxNode::UnaryMinus(p.clone(), right.into()));
+            },
+            Symbols::Not(p) => {
+                let right = self.parse_unary_expression()?;
+                return Ok(SyntaxNode::Not(p.clone(), right.into()));
+            },
+            _ => { return self.parse_unary_expression(); }
+        }
     }
 
     fn parse_term(&mut self) -> Result<SyntaxNode, (Box<std::string::String>, usize, usize)> {
