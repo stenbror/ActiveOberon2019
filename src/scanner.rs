@@ -241,6 +241,7 @@ impl ScannerMethods for Scanner {
             "SELF" => Some(Symbols::_Self(pos)),
             "RESULT" => Some(Symbols::Result(pos)),
             "THEN" => Some(Symbols::Then(pos)),
+            "TRUE" => Some(Symbols::True(pos)),
             "TO" => Some(Symbols::To(pos)),
             "TYPE" => Some(Symbols::Type(pos)),
             "UNTIL" => Some(Symbols::Until(pos)),
@@ -300,6 +301,7 @@ impl ScannerMethods for Scanner {
             "self" => Some(Symbols::_Self(pos)),
             "result" => Some(Symbols::Result(pos)),
             "then" => Some(Symbols::Then(pos)),
+            "true" => Some(Symbols::True(pos)),
             "to" => Some(Symbols::To(pos)),
             "type" => Some(Symbols::Type(pos)),
             "until" => Some(Symbols::Until(pos)),
@@ -1439,6 +1441,947 @@ mod tests {
             _ => { assert!(false); }
         }
     }
+
+    #[test]
+    fn strict_keyword_cell() {
+        let mut lexer = Scanner::new(" CELL", true);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::Cell(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn strict_keyword_cellnet() {
+        let mut lexer = Scanner::new(" CELLNET", true);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::CellNet(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn strict_keyword_begin() {
+        let mut lexer = Scanner::new(" BEGIN", true);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::Begin(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn strict_keyword_by() {
+        let mut lexer = Scanner::new(" BY", true);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::By(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn strict_keyword_const() {
+        let mut lexer = Scanner::new(" CONST", true);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::Const(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn strict_keyword_case() {
+        let mut lexer = Scanner::new(" CASE", true);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::Case(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn strict_keyword_code() {
+        let mut lexer = Scanner::new(" CODE END", true);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::CodeText(p, t) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn strict_keyword_definition() {
+        let mut lexer = Scanner::new(" DEFINITION", true);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::Definition(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn strict_keyword_do() {
+        let mut lexer = Scanner::new(" DO", true);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::Do(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn strict_keyword_div() {
+        let mut lexer = Scanner::new(" DIV", true);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::Div(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn strict_keyword_end() {
+        let mut lexer = Scanner::new(" END", true);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::End(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn strict_keyword_enum() {
+        let mut lexer = Scanner::new(" ENUM", true);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::Enum(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn strict_keyword_else() {
+        let mut lexer = Scanner::new(" ELSE", true);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::Else(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn strict_keyword_elsif() {
+        let mut lexer = Scanner::new(" ELSIF", true);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::Elsif(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn strict_keyword_exit() {
+        let mut lexer = Scanner::new(" EXIT", true);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::Exit(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn strict_keyword_extern() {
+        let mut lexer = Scanner::new(" EXTERN", true);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::Extern(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn strict_keyword_false() {
+        let mut lexer = Scanner::new(" FALSE", true);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::False(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn strict_keyword_for() {
+        let mut lexer = Scanner::new(" FOR", true);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::For(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn strict_keyword_finally() {
+        let mut lexer = Scanner::new(" FINALLY", true);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::Finally(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn strict_keyword_if() {
+        let mut lexer = Scanner::new(" IF", true);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::If(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn strict_keyword_imag() {
+        let mut lexer = Scanner::new(" IMAG", true);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::Imag(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn strict_keyword_in() {
+        let mut lexer = Scanner::new(" IN", true);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::In(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn strict_keyword_is() {
+        let mut lexer = Scanner::new(" IS", true);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::Is(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn strict_keyword_import() {
+        let mut lexer = Scanner::new(" IMPORT", true);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::Import(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn strict_keyword_loop() {
+        let mut lexer = Scanner::new(" LOOP", true);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::Loop(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn strict_keyword_module() {
+        let mut lexer = Scanner::new(" MOD", true);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::Mod(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn strict_keyword_nil() {
+        let mut lexer = Scanner::new(" NIL", true);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::Nil(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn strict_keyword_of() {
+        let mut lexer = Scanner::new(" OF", true);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::Of(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn strict_keyword_or() {
+        let mut lexer = Scanner::new(" OR", true);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::Or(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn strict_keyword_put() {
+        let mut lexer = Scanner::new(" OUT", true);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::Out(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn strict_keyword_operator() {
+        let mut lexer = Scanner::new(" OPERATOR", true);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::Operator(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn strict_keyword_procedure() {
+        let mut lexer = Scanner::new(" PROCEDURE", true);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::Procedure(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn strict_keyword_port() {
+        let mut lexer = Scanner::new(" PORT", true);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::Port(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn strict_keyword_repeat() {
+        let mut lexer = Scanner::new(" REPEAT", true);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::Repeat(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn strict_keyword_return() {
+        let mut lexer = Scanner::new(" RETURN", true);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::Return(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn strict_keyword_self() {
+        let mut lexer = Scanner::new(" SELF", true);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::_Self(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn strict_keyword_result() {
+        let mut lexer = Scanner::new(" RESULT", true);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::Result(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn strict_keyword_then() {
+        let mut lexer = Scanner::new(" THEN", true);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::Then(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn strict_keyword_true() {
+        let mut lexer = Scanner::new(" TRUE", true);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::True(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn strict_keyword_to() {
+        let mut lexer = Scanner::new(" TO", true);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::To(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn strict_keyword_type() {
+        let mut lexer = Scanner::new(" TYPE", true);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::Type(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn strict_keyword_until() {
+        let mut lexer = Scanner::new(" UNTIL", true);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::Until(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn strict_keyword_var() {
+        let mut lexer = Scanner::new(" VAR", true);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::Var(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn strict_keyword_while() {
+        let mut lexer = Scanner::new(" WHILE", true);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::While(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn strict_keyword_with() {
+        let mut lexer = Scanner::new(" WITH", true);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::With(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn strict_keyword_array() {
+        let mut lexer = Scanner::new(" ARRAY", true);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::Array(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn strict_keyword_object() {
+        let mut lexer = Scanner::new(" OBJECT", true);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::Object(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn strict_keyword_pointer() {
+        let mut lexer = Scanner::new(" POINTER", true);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::Pointer(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn strict_keyword_record() {
+        let mut lexer = Scanner::new(" RECORD", true);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::Record(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn strict_keyword_address() {
+        let mut lexer = Scanner::new(" ADDRESS", true);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::Address(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn strict_keyword_size() {
+        let mut lexer = Scanner::new(" SIZE", true);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::Size(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn strict_keyword_alias() {
+        let mut lexer = Scanner::new(" ALIAS", true);
+        let symb = lexer.get_next_symbol();
+
+        match symb {
+            Ok(x) => {
+                match x {
+                    Symbols::Alias(p) => {
+                        assert_eq!(1, p);
+                    },
+                    _ => { assert!(false); }
+                }
+            },
+            _ => { assert!(false); }
+        }
+    }
+
+
+
+
+
 
     #[test]
     fn keyword_await() {
