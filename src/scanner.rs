@@ -149,6 +149,7 @@ pub trait ScannerMethods {
     fn get_next_symbol(&mut self) -> Result<Symbols, (Box<std::string::String>, usize, usize)>;
     fn is_capitalize_reserved_keyword(&self, text: &str, pos: usize) -> Option<Symbols>;
     fn is_reserved_keyword(&self, text: &str, pos: usize) -> Option<Symbols>;
+    fn get_location(&self) -> (usize, usize);
 }
 
 
@@ -626,6 +627,10 @@ impl ScannerMethods for Scanner {
                 todo!();
             }
         }
+    }
+
+    fn get_location(&self) -> (usize, usize) {
+        return (self.position.clone(), self.lineno.clone())
     }
 }
 

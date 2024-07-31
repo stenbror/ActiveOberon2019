@@ -21,7 +21,8 @@ pub enum SyntaxNode {
     Plus(usize, Rc<SyntaxNode>, Rc<SyntaxNode>),
     Minus(usize, Rc<SyntaxNode>, Rc<SyntaxNode>),
     Or(usize, Rc<SyntaxNode>, Rc<SyntaxNode>),
-
+    RangeMul(usize),
+    Range(usize, Rc<SyntaxNode>, Rc<SyntaxNode>, Rc<SyntaxNode>),
     Equal(usize, Rc<SyntaxNode>, Rc<SyntaxNode>),
     UnEqual(usize, Rc<SyntaxNode>, Rc<SyntaxNode>),
     Less(usize, Rc<SyntaxNode>, Rc<SyntaxNode>),
@@ -186,7 +187,58 @@ impl ParseMethods for Parser {
     }
 
     fn parse_range_expression(&mut self) -> Result<SyntaxNode, (Box<std::string::String>, usize, usize)> {
-        todo!()
+        let mut left = SyntaxNode::None;
+        let mut right = SyntaxNode::None;
+        let mut next = SyntaxNode::None;
+        match  &self.symbol.clone()? {
+            Symbols::Mul(p) => {
+                self.advance();
+                return Ok(SyntaxNode::RangeMul(p.clone()));
+            },
+            Symbols::UpTo(p) => {
+                self.advance();
+                match &self.symbol.clone()? {
+                    Symbols::By(_) | Symbols::RightCurly(_) | Symbols::Comma(_) => {
+                        right = self.parse_simple_expression()?;
+                    },
+                    _ => ()
+                }
+                match &self.symbol.clone()? {
+                    Symbols::By(_) => {
+                        self.advance();
+                        next = self.parse_simple_expression()?;
+                    },
+                    _ => ()
+                }
+                return Ok(SyntaxNode::Range(p.clone(), left.into(), right.into(), next.into()));
+            }
+            _ => {
+                left = self.parse_simple_expression()?;
+                match &self.symbol.clone()? {
+                    Symbols::UpTo(p) => {
+                        self.advance();
+                        match &self.symbol.clone()? {
+                            Symbols::By(_) | Symbols::RightCurly(_) | Symbols::Comma(_) => {
+                                right = self.parse_simple_expression()?;
+                            },
+                            _ => ()
+                        }
+                        match &self.symbol.clone()? {
+                            Symbols::By(_) => {
+                                self.advance();
+                                next = self.parse_simple_expression()?;
+                            },
+                            _ => ()
+                        }
+                        return Ok(SyntaxNode::Range(p.clone(), left.into(), right.into(), next.into()));
+                    },
+                    _ => { 
+                        let (p, l) = self.lexer.get_location();    
+                        return Err( (Box::new(String::from("Missing '..' in Range!")), p, l) ); 
+                    }
+                }
+            }
+        }
     }
 
     fn parse_expression(&mut self) -> Result<SyntaxNode, (Box<std::string::String>, usize, usize)> {
