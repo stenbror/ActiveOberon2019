@@ -5,6 +5,10 @@ use std::rc::Rc;
 pub enum SyntaxNode {
     None,
 
+    Nil(usize),
+
+    DesignatorWithFlags(usize, Rc<SyntaxNode>, Rc<SyntaxNode>, Rc<SyntaxNode>),
+    Designator(usize, Rc<SyntaxNode>, Rc<SyntaxNode>),
     UnaryPlus(usize, Rc<SyntaxNode>),
     UnaryMinus(usize, Rc<SyntaxNode>),
     Not(usize, Rc<SyntaxNode>),
@@ -54,6 +58,10 @@ pub trait ParseMethods {
     fn parse_simple_expression(&mut self) -> Result<SyntaxNode, (Box<std::string::String>, usize, usize)>;
     fn parse_range_expression(&mut self) -> Result<SyntaxNode, (Box<std::string::String>, usize, usize)>;
     fn parse_expression(&mut self) -> Result<SyntaxNode, (Box<std::string::String>, usize, usize)>;
+
+    fn parse_flags(&mut self) -> Result<SyntaxNode, (Box<std::string::String>, usize, usize)>;
+    fn parse_designator_operations(&mut self) -> Result<SyntaxNode, (Box<std::string::String>, usize, usize)>;
+
 }
 
 pub struct Parser {
@@ -75,11 +83,41 @@ impl ParseMethods for Parser {
     }
 
     fn parse_primary_expression(&mut self) -> Result<SyntaxNode, (Box<std::string::String>, usize, usize)> {
-        todo!()
+        match &self.symbol.clone()? {
+            Symbols::Nil(p) => {
+                self.advance();
+                return Ok(SyntaxNode::Nil(p.clone()));
+            }
+            _ => {
+                let (p, l) = self.lexer.get_location();
+                return Err( (Box::new(String::from("Unknown literal or missing literal!")), p, l) );
+            }
+        }
     }
 
     fn parse_unary_expression(&mut self) -> Result<SyntaxNode, (Box<std::string::String>, usize, usize)> {
-        todo!()
+        let left = self.parse_primary_expression()?;
+        match &self.symbol.clone()? {
+            Symbols::LeftParen(p) | Symbols::LeftBracket(p) | Symbols::Period(p) | Symbols::Transpose(p) | Symbols::Arrow(p) => {
+                let right = self.parse_designator_operations()?;
+                match &self.symbol.clone()? {
+                    Symbols::LeftCurly(_) => {
+                        let flags = self.parse_flags()?;
+                        return Ok(SyntaxNode::DesignatorWithFlags(p.clone(), left.into(), right.into(), flags.into()));
+                    },
+                    _ => {
+                        return Ok(SyntaxNode::Designator(p.clone(), left.into(), right.into()));
+                    }
+                }
+            },
+            Symbols::LeftCurly(p) => {
+                let flags = self.parse_flags()?;
+                return Ok(SyntaxNode::DesignatorWithFlags(p.clone(), left.into(), Rc::new(SyntaxNode::None), flags.into()));
+            },
+            _ => {
+                return Ok(left);
+            }
+        }
     }
 
     fn parse_factor(&mut self) -> Result<SyntaxNode, (Box<std::string::String>, usize, usize)> {
@@ -336,5 +374,13 @@ impl ParseMethods for Parser {
             },
             _ => { return Ok(left); }
         }
+    }
+
+    fn parse_flags(&mut self) -> Result<SyntaxNode, (Box<std::string::String>, usize, usize)> {
+        todo!()
+    }
+
+    fn parse_designator_operations(&mut self) -> Result<SyntaxNode, (Box<std::string::String>, usize, usize)> {
+        todo!()
     }
 }
