@@ -6,6 +6,11 @@ pub enum SyntaxNode {
     None,
 
     Nil(usize),
+    Imag(usize),
+    True(usize),
+    False(usize),
+    _Self(usize),
+    Result(usize),
 
     DesignatorWithFlags(usize, Rc<SyntaxNode>, Rc<SyntaxNode>, Rc<SyntaxNode>),
     Designator(usize, Rc<SyntaxNode>, Rc<SyntaxNode>),
@@ -87,6 +92,26 @@ impl ParseMethods for Parser {
             Symbols::Nil(p) => {
                 self.advance();
                 return Ok(SyntaxNode::Nil(p.clone()));
+            },
+            Symbols::Imag(p) => {
+                self.advance();
+                return Ok(SyntaxNode::Imag(p.clone()));
+            },
+            Symbols::True(p) => {
+                self.advance();
+                return Ok(SyntaxNode::True(p.clone()));
+            },
+            Symbols::False(p) => {
+                self.advance();
+                return Ok(SyntaxNode::False(p.clone()));
+            },
+            Symbols::_Self(p) => {
+                self.advance();
+                return Ok(SyntaxNode::_Self(p.clone()));
+            },
+            Symbols::Result(p) => {
+                self.advance();
+                return Ok(SyntaxNode::Result(p.clone()));
             }
             _ => {
                 let (p, l) = self.lexer.get_location();
@@ -271,8 +296,7 @@ impl ParseMethods for Parser {
                         return Ok(SyntaxNode::Range(p.clone(), left.into(), right.into(), next.into()));
                     },
                     _ => { 
-                        let (p, l) = self.lexer.get_location();    
-                        return Err( (Box::new(String::from("Missing '..' in Range!")), p, l) ); 
+                        return Ok(left);
                     }
                 }
             }
@@ -383,4 +407,112 @@ impl ParseMethods for Parser {
     fn parse_designator_operations(&mut self) -> Result<SyntaxNode, (Box<std::string::String>, usize, usize)> {
         todo!()
     }
+}
+
+
+
+#[cfg(test)]
+mod tests {
+
+    use std::rc::Rc;
+
+    use crate::scanner::{Scanner, ScannerMethods, Symbols};
+    use crate::parser::{Parser, ParseMethods, SyntaxNode};
+
+    #[test]
+    fn primary_expression_nil() {
+        let mut parser = Parser::new("nil", false);
+        parser.advance();
+        let res = parser.parse_expression();
+
+        match res {
+            Ok(s) => {
+                assert_eq!(SyntaxNode::Nil(0), s);
+            },
+            _ => {
+                assert!(false);
+            }
+        }
+    }
+
+    #[test]
+    fn primary_expression_imag() {
+        let mut parser = Parser::new("IMAG", false);
+        parser.advance();
+        let res = parser.parse_expression();
+
+        match res {
+            Ok(s) => {
+                assert_eq!(SyntaxNode::Imag(0), s);
+            },
+            _ => {
+                assert!(false);
+            }
+        } 
+    }
+
+    #[test]
+    fn primary_expression_true() {
+        let mut parser = Parser::new("true", false);
+        parser.advance();
+        let res = parser.parse_expression();
+
+        match res {
+            Ok(s) => {
+                assert_eq!(SyntaxNode::True(0), s);
+            },
+            _ => {
+                assert!(false);
+            }
+        } 
+    }
+
+    #[test]
+    fn primary_expression_false() {
+        let mut parser = Parser::new("FALSE", false);
+        parser.advance();
+        let res = parser.parse_expression();
+
+        match res {
+            Ok(s) => {
+                assert_eq!(SyntaxNode::False(0), s);
+            },
+            _ => {
+                assert!(false);
+            }
+        } 
+    }
+
+    #[test]
+    fn primary_expression_self() {
+        let mut parser = Parser::new("self", false);
+        parser.advance();
+        let res = parser.parse_expression();
+
+        match res {
+            Ok(s) => {
+                assert_eq!(SyntaxNode::_Self(0), s);
+            },
+            _ => {
+                assert!(false);
+            }
+        } 
+    }
+
+    #[test]
+    fn primary_expression_result() {
+        let mut parser = Parser::new("RESULT", false);
+        parser.advance();
+        let res = parser.parse_expression();
+
+        match res {
+            Ok(s) => {
+                assert_eq!(SyntaxNode::Result(0), s);
+            },
+            _ => {
+                assert!(false);
+            }
+        } 
+    }
+
 }
