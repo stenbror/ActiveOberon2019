@@ -16,5 +16,5 @@ fn main() {
     parser.advance();
     let symb = parser.parse_expression();
 
-    println!("\r\n{color_bright_green}Active Oberon (2019 Revision){color_reset} Compiler, Version {version} [Build: {COMPILE_DATE_STRING}]\r\n");
+    println!("\r\n {color_bright_green}Active Oberon (2019 Revision){color_reset} Compiler, Version {version} [Build: {COMPILE_DATE_STRING}]\r\n");
 }

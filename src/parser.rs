@@ -25,7 +25,7 @@ pub enum SyntaxNode {
     Designator(usize, Rc<SyntaxNode>, Rc<SyntaxNode>),
     UnaryPlus(usize, Rc<SyntaxNode>),
     UnaryMinus(usize, Rc<SyntaxNode>),
-    Not(usize, Rc<SyntaxNode>),
+    UnaryNot(usize, Rc<SyntaxNode>),
     Mul(usize, Rc<SyntaxNode>, Rc<SyntaxNode>),
     Slash(usize, Rc<SyntaxNode>, Rc<SyntaxNode>),
     Div(usize, Rc<SyntaxNode>, Rc<SyntaxNode>),
@@ -229,16 +229,19 @@ impl ParseMethods for Parser {
     fn parse_factor(&mut self) -> Result<SyntaxNode, (Box<std::string::String>, usize, usize)> {
         match &self.symbol.clone()? {
             Symbols::Plus(p) => {
+                self.advance();
                 let right = self.parse_unary_expression()?;
                 return Ok(SyntaxNode::UnaryPlus(p.clone(), right.into()));
             },
             Symbols::Minus(p) => {
+                self.advance();
                 let right = self.parse_unary_expression()?;
                 return Ok(SyntaxNode::UnaryMinus(p.clone(), right.into()));
             },
             Symbols::Not(p) => {
+                self.advance();
                 let right = self.parse_unary_expression()?;
-                return Ok(SyntaxNode::Not(p.clone(), right.into()));
+                return Ok(SyntaxNode::UnaryNot(p.clone(), right.into()));
             },
             _ => { return self.parse_unary_expression(); }
         }
@@ -798,4 +801,51 @@ mod tests {
         } 
     }
 
+    #[test]
+    fn factor_unary_plus() {
+        let mut parser = Parser::new("+a", false);
+        parser.advance();
+        let res = parser.parse_expression();
+
+        match res {
+            Ok(s) => {
+                assert_eq!(SyntaxNode::UnaryPlus(0, Rc::new(SyntaxNode::Ident(1, Box::new(String::from("a"))))), s);
+            },
+            _ => {
+                assert!(false);
+            }
+        } 
+    }
+
+    #[test]
+    fn factor_unary_minus() {
+        let mut parser = Parser::new("-a", false);
+        parser.advance();
+        let res = parser.parse_expression();
+
+        match res {
+            Ok(s) => {
+                assert_eq!(SyntaxNode::UnaryMinus(0, Rc::new(SyntaxNode::Ident(1, Box::new(String::from("a"))))), s);
+            },
+            _ => {
+                assert!(false);
+            }
+        } 
+    }
+
+    #[test]
+    fn factor_unary_not() {
+        let mut parser = Parser::new("~a", false);
+        parser.advance();
+        let res = parser.parse_expression();
+
+        match res {
+            Ok(s) => {
+                assert_eq!(SyntaxNode::UnaryNot(0, Rc::new(SyntaxNode::Ident(1, Box::new(String::from("a"))))), s);
+            },
+            _ => {
+                assert!(false);
+            }
+        } 
+    }
 }
