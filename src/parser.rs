@@ -5,6 +5,9 @@ use std::rc::Rc;
 pub enum SyntaxNode {
     None,
 
+    Ident(usize, Box<String>),
+    Number(usize, Box<String>),
+    String(usize, Box<String>),
     Nil(usize),
     Imag(usize),
     True(usize),
@@ -157,6 +160,32 @@ impl ParseMethods for Parser {
                         return Ok(SyntaxNode::Size(p.clone()));
                     }
                 }
+            },
+            Symbols::LeftParen(_) => {
+                self.advance();
+                let right = self.parse_expression()?;
+                match &self.symbol.clone()? {
+                    Symbols::RightParen(_) => {
+                        self.advance();
+                        return Ok(right);
+                    },
+                    _ => {
+                        let (p, l) = self.lexer.get_location();
+                        return Err( (Box::new(String::from("Missing ')' in exprfession!")), p, l) );
+                    }
+                }
+            },
+            Symbols::Ident(p, s) => {
+                self.advance();
+                return Ok(SyntaxNode::Ident(p.clone(), s.clone()));
+            },
+            Symbols::Number(p, s) => {
+                self.advance();
+                return Ok(SyntaxNode::Number(p.clone(), s.clone()));
+            },
+            Symbols::String(p, s) => {
+                self.advance();
+                return Ok(SyntaxNode::String(p.clone(), s.clone()));
             },
             _ => {
                     let (p, l) = self.lexer.get_location();
@@ -553,6 +582,22 @@ mod tests {
         match res {
             Ok(s) => {
                 assert_eq!(SyntaxNode::Result(0), s);
+            },
+            _ => {
+                assert!(false);
+            }
+        } 
+    }
+
+    #[test]
+    fn primary_literal_ident() {
+        let mut parser = Parser::new("variable_1", false);
+        parser.advance();
+        let res = parser.parse_expression();
+
+        match res {
+            Ok(s) => {
+                assert_eq!(SyntaxNode::Ident(0, Box::new(String::from("variable_1"))), s);
             },
             _ => {
                 assert!(false);

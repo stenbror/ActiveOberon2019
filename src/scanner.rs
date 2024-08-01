@@ -134,7 +134,7 @@ pub enum Symbols {
 
     /* Literals */
     Ident(usize, Box<String>),
-    Number(usize),
+    Number(usize, Box<String>),
     String(usize, Box<String>),
     Char(usize),
 
