@@ -59,6 +59,12 @@ pub enum SyntaxNode {
     ExclamationMarkExclamationMark(usize, Rc<SyntaxNode>, Rc<SyntaxNode>),
     LessLessQ(usize, Rc<SyntaxNode>, Rc<SyntaxNode>),
     GreaterGreaterQ(usize, Rc<SyntaxNode>, Rc<SyntaxNode>),
+    DesignatorElements(usize, Rc<Vec<SyntaxNode>>),
+    DesignatorDotName(usize, Box<String>),
+    DesignatorTranspose(usize),
+    DesignatorArrow(usize),
+    DesignatorCall(usize, Rc<SyntaxNode>),
+    DesignatorIndex(usize, Rc<SyntaxNode>),
 }
 
 pub trait ParseMethods {
@@ -75,7 +81,8 @@ pub trait ParseMethods {
 
     fn parse_flags(&mut self) -> Result<SyntaxNode, (Box<std::string::String>, usize, usize)>;
     fn parse_designator_operations(&mut self) -> Result<SyntaxNode, (Box<std::string::String>, usize, usize)>;
-
+    fn parse_expression_list(&mut self) -> Result<SyntaxNode, (Box<std::string::String>, usize, usize)>;
+    fn parse_index_list(&mut self) -> Result<SyntaxNode, (Box<std::string::String>, usize, usize)>;
 }
 
 pub struct Parser {
@@ -479,6 +486,80 @@ impl ParseMethods for Parser {
     }
 
     fn parse_designator_operations(&mut self) -> Result<SyntaxNode, (Box<std::string::String>, usize, usize)> {
+        let mut nodes = Vec::<SyntaxNode>::new();
+        let ( pos, _ ) = self.lexer.get_location();
+
+        loop {
+            match &self.symbol.clone()? {
+                Symbols::Transpose(p) => {
+                    self.advance();
+                    nodes.push(SyntaxNode::DesignatorTranspose(p.clone()));
+                },
+                Symbols::Arrow(p) => {
+                    self.advance();
+                    nodes.push(SyntaxNode::DesignatorArrow(p.clone()));
+                },
+                Symbols::Period(p) => {
+                    self.advance();
+                    match &self.symbol.clone()? {
+                        Symbols::Ident(p, s) => {
+                            self.advance();
+                            nodes.push(SyntaxNode::DesignatorDotName(p.clone(), s.clone()));
+                        },
+                        _ => {
+                            let (p, l) = self.lexer.get_location();
+                            return Err( (Box::new(String::from("Expecting Literal ident after '.' in designator!")), p, l) );
+                        }
+                    }
+                },
+                Symbols::LeftParen(p) => {
+                    self.advance();
+                    let right = match &self.symbol.clone()? {
+                        Symbols::RightParen(_) => SyntaxNode::None,
+                        _ => { self.parse_expression_list()? }
+                    };
+                    match &self.symbol.clone()? {
+                        Symbols::RightParen(_) => {
+                            self.advance();
+                            nodes.push(SyntaxNode::DesignatorCall(p.clone(), right.into()))
+                        },
+                        _ => {
+                            let (p, l) = self.lexer.get_location();
+                            return Err( (Box::new(String::from("Expecting ')' in call designator!")), p, l) );
+                        }
+                    }
+                },
+                Symbols::LeftBracket(p) => {
+                    self.advance();
+                    let right = match &self.symbol.clone()? {
+                        Symbols::RightBracket(_) => SyntaxNode::None,
+                        _ => { self.parse_index_list()? }
+                    };
+                    match &self.symbol.clone()? {
+                        Symbols::RightBracket(_) => {
+                            self.advance();
+                            nodes.push(SyntaxNode::DesignatorIndex(p.clone(), right.into()))
+                        },
+                        _ => {
+                            let (p, l) = self.lexer.get_location();
+                            return Err( (Box::new(String::from("Expecting ')' in call designator!")), p, l) );
+                        }
+                    }
+                },
+                _ => {
+                    break;
+                }
+            }
+        }
+
+        return Ok(SyntaxNode::DesignatorElements(pos.clone(), Rc::new(nodes.into())));
+    }
+
+    fn parse_expression_list(&mut self) -> Result<SyntaxNode, (Box<std::string::String>, usize, usize)> {
+        todo!()
+    }
+
+    fn parse_index_list(&mut self) -> Result<SyntaxNode, (Box<std::string::String>, usize, usize)> {
         todo!()
     }
 }
