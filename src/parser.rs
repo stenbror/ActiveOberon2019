@@ -590,6 +590,102 @@ mod tests {
     }
 
     #[test]
+    fn primary_expression_alias() {
+        let mut parser = Parser::new("ALIAS", false);
+        parser.advance();
+        let res = parser.parse_expression();
+
+        match res {
+            Ok(s) => {
+                assert_eq!(SyntaxNode::Alias(0), s);
+            },
+            _ => {
+                assert!(false);
+            }
+        } 
+    }
+
+    #[test]
+    fn primary_expression_alias_of() {
+        let mut parser = Parser::new("ALIAS OF test", false);
+        parser.advance();
+        let res = parser.parse_expression();
+
+        match res {
+            Ok(s) => {
+                assert_eq!(SyntaxNode::AliasOf(0, Rc::new( SyntaxNode::Ident(9, Box::new(String::from("test"))) )), s);
+            },
+            _ => {
+                assert!(false);
+            }
+        } 
+    }
+
+    #[test]
+    fn primary_expression_address() {
+        let mut parser = Parser::new("address", false);
+        parser.advance();
+        let res = parser.parse_expression();
+
+        match res {
+            Ok(s) => {
+                assert_eq!(SyntaxNode::Address(0), s);
+            },
+            _ => {
+                assert!(false);
+            }
+        } 
+    }
+
+    #[test]
+    fn primary_expression_address_of() {
+        let mut parser = Parser::new("address OF test", false);
+        parser.advance();
+        let res = parser.parse_expression();
+
+        match res {
+            Ok(s) => {
+                assert_eq!(SyntaxNode::AddressOf(0, Rc::new( SyntaxNode::Ident(11, Box::new(String::from("test"))) )), s);
+            },
+            _ => {
+                assert!(false);
+            }
+        } 
+    }
+
+    #[test]
+    fn primary_expression_sizeof() {
+        let mut parser = Parser::new("size", false);
+        parser.advance();
+        let res = parser.parse_expression();
+
+        match res {
+            Ok(s) => {
+                assert_eq!(SyntaxNode::Size(0), s);
+            },
+            _ => {
+                assert!(false);
+            }
+        } 
+    }
+
+    #[test]
+    fn primary_expression_sizeof_of() {
+        let mut parser = Parser::new("size of test", false);
+        parser.advance();
+        let res = parser.parse_expression();
+
+        match res {
+            Ok(s) => {
+                assert_eq!(SyntaxNode::SizeOf(0, Rc::new( SyntaxNode::Ident(8, Box::new(String::from("test"))) )), s);
+            },
+            _ => {
+                assert!(false);
+            }
+        } 
+    }
+
+    #[test]
     fn primary_literal_ident() {
         let mut parser = Parser::new("variable_1", false);
         parser.advance();
@@ -598,6 +694,22 @@ mod tests {
         match res {
             Ok(s) => {
                 assert_eq!(SyntaxNode::Ident(0, Box::new(String::from("variable_1"))), s);
+            },
+            _ => {
+                assert!(false);
+            }
+        } 
+    }
+
+    #[test]
+    fn primary_literal_ident_parenthesis() {
+        let mut parser = Parser::new("(variable_1)", false);
+        parser.advance();
+        let res = parser.parse_expression();
+
+        match res {
+            Ok(s) => {
+                assert_eq!(SyntaxNode::Ident(1, Box::new(String::from("variable_1"))), s);
             },
             _ => {
                 assert!(false);
