@@ -11,6 +11,12 @@ pub enum SyntaxNode {
     False(usize),
     _Self(usize),
     Result(usize),
+    AliasOf(usize, Rc<SyntaxNode>),
+    Alias(usize),
+    SizeOf(usize, Rc<SyntaxNode>),
+    Size(usize),
+    AddressOf(usize, Rc<SyntaxNode>),
+    Address(usize),
 
     DesignatorWithFlags(usize, Rc<SyntaxNode>, Rc<SyntaxNode>, Rc<SyntaxNode>),
     Designator(usize, Rc<SyntaxNode>, Rc<SyntaxNode>),
@@ -112,10 +118,49 @@ impl ParseMethods for Parser {
             Symbols::Result(p) => {
                 self.advance();
                 return Ok(SyntaxNode::Result(p.clone()));
-            }
+            },
+            Symbols::Address(p) => {
+                self.advance();
+                match &self.symbol.clone()? {
+                    Symbols::Of(_) => {
+                        self.advance();
+                        let right = self.parse_factor()?;
+                        return Ok(SyntaxNode::AddressOf(p.clone(), right.into()));
+                    },
+                    _ => {
+                        return Ok(SyntaxNode::Address(p.clone()));
+                    }
+                }
+            },
+            Symbols::Alias(p) => {
+                self.advance();
+                match &self.symbol.clone()? {
+                    Symbols::Of(_) => {
+                        self.advance();
+                        let right = self.parse_factor()?;
+                        return Ok(SyntaxNode::AliasOf(p.clone(), right.into()));
+                    },
+                    _ => {
+                        return Ok(SyntaxNode::Alias(p.clone()));
+                    }
+                }
+            },
+            Symbols::Size(p) => {
+                self.advance();
+                match &self.symbol.clone()? {
+                    Symbols::Of(_) => {
+                        self.advance();
+                        let right = self.parse_factor()?;
+                        return Ok(SyntaxNode::SizeOf(p.clone(), right.into()));
+                    },
+                    _ => {
+                        return Ok(SyntaxNode::Size(p.clone()));
+                    }
+                }
+            },
             _ => {
-                let (p, l) = self.lexer.get_location();
-                return Err( (Box::new(String::from("Unknown literal or missing literal!")), p, l) );
+                    let (p, l) = self.lexer.get_location();
+                    return Err( (Box::new(String::from("Unknown literal or missing literal!")), p, l) );
             }
         }
     }
