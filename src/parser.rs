@@ -71,18 +71,18 @@ pub trait ParseMethods {
     fn new(text: &'static str, strict: bool) -> Self;
     fn advance(&mut self) -> ();
 
-    fn parse_primary_expression(&mut self) -> Result<SyntaxNode, (Box<std::string::String>, usize, usize)>;
-    fn parse_unary_expression(&mut self) -> Result<SyntaxNode, (Box<std::string::String>, usize, usize)>;
-    fn parse_factor(&mut self) -> Result<SyntaxNode, (Box<std::string::String>, usize, usize)>;
-    fn parse_term(&mut self) -> Result<SyntaxNode, (Box<std::string::String>, usize, usize)>;
-    fn parse_simple_expression(&mut self) -> Result<SyntaxNode, (Box<std::string::String>, usize, usize)>;
-    fn parse_range_expression(&mut self) -> Result<SyntaxNode, (Box<std::string::String>, usize, usize)>;
-    fn parse_expression(&mut self) -> Result<SyntaxNode, (Box<std::string::String>, usize, usize)>;
+    fn parse_primary_expression(&mut self) -> Result<Rc<SyntaxNode>, (Box<std::string::String>, usize, usize)>;
+    fn parse_unary_expression(&mut self) -> Result<Rc<SyntaxNode>, (Box<std::string::String>, usize, usize)>;
+    fn parse_factor(&mut self) -> Result<Rc<SyntaxNode>, (Box<std::string::String>, usize, usize)>;
+    fn parse_term(&mut self) -> Result<Rc<SyntaxNode>, (Box<std::string::String>, usize, usize)>;
+    fn parse_simple_expression(&mut self) -> Result<Rc<SyntaxNode>, (Box<std::string::String>, usize, usize)>;
+    fn parse_range_expression(&mut self) -> Result<Rc<SyntaxNode>, (Box<std::string::String>, usize, usize)>;
+    fn parse_expression(&mut self) -> Result<Rc<SyntaxNode>, (Box<std::string::String>, usize, usize)>;
 
-    fn parse_flags(&mut self) -> Result<SyntaxNode, (Box<std::string::String>, usize, usize)>;
-    fn parse_designator_operations(&mut self) -> Result<SyntaxNode, (Box<std::string::String>, usize, usize)>;
-    fn parse_expression_list(&mut self) -> Result<SyntaxNode, (Box<std::string::String>, usize, usize)>;
-    fn parse_index_list(&mut self) -> Result<SyntaxNode, (Box<std::string::String>, usize, usize)>;
+    fn parse_flags(&mut self) -> Result<Rc<SyntaxNode>, (Box<std::string::String>, usize, usize)>;
+    fn parse_designator_operations(&mut self) -> Result<Rc<SyntaxNode>, (Box<std::string::String>, usize, usize)>;
+    fn parse_expression_list(&mut self) -> Result<Rc<SyntaxNode>, (Box<std::string::String>, usize, usize)>;
+    fn parse_index_list(&mut self) -> Result<Rc<SyntaxNode>, (Box<std::string::String>, usize, usize)>;
 }
 
 pub struct Parser {
@@ -103,31 +103,31 @@ impl ParseMethods for Parser {
         self.symbol = self.lexer.get_next_symbol()
     }
 
-    fn parse_primary_expression(&mut self) -> Result<SyntaxNode, (Box<std::string::String>, usize, usize)> {
+    fn parse_primary_expression(&mut self) -> Result<Rc<SyntaxNode>, (Box<std::string::String>, usize, usize)> {
         match &self.symbol.clone()? {
             Symbols::Nil(p) => {
                 self.advance();
-                return Ok(SyntaxNode::Nil(p.clone()));
+                return Ok(Rc::new(SyntaxNode::Nil(p.clone())));
             },
             Symbols::Imag(p) => {
                 self.advance();
-                return Ok(SyntaxNode::Imag(p.clone()));
+                return Ok(Rc::new(SyntaxNode::Imag(p.clone())));
             },
             Symbols::True(p) => {
                 self.advance();
-                return Ok(SyntaxNode::True(p.clone()));
+                return Ok(Rc::new(SyntaxNode::True(p.clone())));
             },
             Symbols::False(p) => {
                 self.advance();
-                return Ok(SyntaxNode::False(p.clone()));
+                return Ok(Rc::new(SyntaxNode::False(p.clone())));
             },
             Symbols::_Self(p) => {
                 self.advance();
-                return Ok(SyntaxNode::_Self(p.clone()));
+                return Ok(Rc::new(SyntaxNode::_Self(p.clone())));
             },
             Symbols::Result(p) => {
                 self.advance();
-                return Ok(SyntaxNode::Result(p.clone()));
+                return Ok(Rc::new(SyntaxNode::Result(p.clone())));
             },
             Symbols::Address(p) => {
                 self.advance();
@@ -135,10 +135,10 @@ impl ParseMethods for Parser {
                     Symbols::Of(_) => {
                         self.advance();
                         let right = self.parse_factor()?;
-                        return Ok(SyntaxNode::AddressOf(p.clone(), right.into()));
+                        return Ok(Rc::new(SyntaxNode::AddressOf(p.clone(), right.into())));
                     },
                     _ => {
-                        return Ok(SyntaxNode::Address(p.clone()));
+                        return Ok(Rc::new(SyntaxNode::Address(p.clone())));
                     }
                 }
             },
@@ -148,10 +148,10 @@ impl ParseMethods for Parser {
                     Symbols::Of(_) => {
                         self.advance();
                         let right = self.parse_factor()?;
-                        return Ok(SyntaxNode::AliasOf(p.clone(), right.into()));
+                        return Ok(Rc::new(SyntaxNode::AliasOf(p.clone(), right.into())));
                     },
                     _ => {
-                        return Ok(SyntaxNode::Alias(p.clone()));
+                        return Ok(Rc::new(SyntaxNode::Alias(p.clone())));
                     }
                 }
             },
@@ -161,10 +161,10 @@ impl ParseMethods for Parser {
                     Symbols::Of(_) => {
                         self.advance();
                         let right = self.parse_factor()?;
-                        return Ok(SyntaxNode::SizeOf(p.clone(), right.into()));
+                        return Ok(Rc::new(SyntaxNode::SizeOf(p.clone(), right.into())));
                     },
                     _ => {
-                        return Ok(SyntaxNode::Size(p.clone()));
+                        return Ok(Rc::new(SyntaxNode::Size(p.clone())));
                     }
                 }
             },
@@ -184,15 +184,15 @@ impl ParseMethods for Parser {
             },
             Symbols::Ident(p, s) => {
                 self.advance();
-                return Ok(SyntaxNode::Ident(p.clone(), s.clone()));
+                return Ok(Rc::new(SyntaxNode::Ident(p.clone(), s.clone())));
             },
             Symbols::Number(p, s) => {
                 self.advance();
-                return Ok(SyntaxNode::Number(p.clone(), s.clone()));
+                return Ok(Rc::new(SyntaxNode::Number(p.clone(), s.clone())));
             },
             Symbols::String(p, s) => {
                 self.advance();
-                return Ok(SyntaxNode::String(p.clone(), s.clone()));
+                return Ok(Rc::new(SyntaxNode::String(p.clone(), s.clone())));
             },
             _ => {
                     let (p, l) = self.lexer.get_location();
@@ -201,7 +201,7 @@ impl ParseMethods for Parser {
         }
     }
 
-    fn parse_unary_expression(&mut self) -> Result<SyntaxNode, (Box<std::string::String>, usize, usize)> {
+    fn parse_unary_expression(&mut self) -> Result<Rc<SyntaxNode>, (Box<std::string::String>, usize, usize)> {
         let left = self.parse_primary_expression()?;
         match &self.symbol.clone()? {
             Symbols::LeftParen(p) | Symbols::LeftBracket(p) | Symbols::Period(p) | Symbols::Transpose(p) | Symbols::Arrow(p) => {
@@ -209,16 +209,16 @@ impl ParseMethods for Parser {
                 match &self.symbol.clone()? {
                     Symbols::LeftCurly(_) => {
                         let flags = self.parse_flags()?;
-                        return Ok(SyntaxNode::DesignatorWithFlags(p.clone(), left.into(), right.into(), flags.into()));
+                        return Ok(Rc::new(SyntaxNode::DesignatorWithFlags(p.clone(), left.into(), right.into(), flags.into())));
                     },
                     _ => {
-                        return Ok(SyntaxNode::Designator(p.clone(), left.into(), right.into()));
+                        return Ok(Rc::new(SyntaxNode::Designator(p.clone(), left.into(), right.into())));
                     }
                 }
             },
             Symbols::LeftCurly(p) => {
                 let flags = self.parse_flags()?;
-                return Ok(SyntaxNode::DesignatorWithFlags(p.clone(), left.into(), Rc::new(SyntaxNode::None), flags.into()));
+                return Ok(Rc::new(SyntaxNode::DesignatorWithFlags(p.clone(), left.into(), Rc::new(SyntaxNode::None), flags.into())));
             },
             _ => {
                 return Ok(left);
@@ -226,80 +226,80 @@ impl ParseMethods for Parser {
         }
     }
 
-    fn parse_factor(&mut self) -> Result<SyntaxNode, (Box<std::string::String>, usize, usize)> {
+    fn parse_factor(&mut self) -> Result<Rc<SyntaxNode>, (Box<std::string::String>, usize, usize)> {
         match &self.symbol.clone()? {
             Symbols::Plus(p) => {
                 self.advance();
                 let right = self.parse_unary_expression()?;
-                return Ok(SyntaxNode::UnaryPlus(p.clone(), right.into()));
+                return Ok(Rc::new(SyntaxNode::UnaryPlus(p.clone(), right.into())));
             },
             Symbols::Minus(p) => {
                 self.advance();
                 let right = self.parse_unary_expression()?;
-                return Ok(SyntaxNode::UnaryMinus(p.clone(), right.into()));
+                return Ok(Rc::new(SyntaxNode::UnaryMinus(p.clone(), right.into())));
             },
             Symbols::Not(p) => {
                 self.advance();
                 let right = self.parse_unary_expression()?;
-                return Ok(SyntaxNode::UnaryNot(p.clone(), right.into()));
+                return Ok(Rc::new(SyntaxNode::UnaryNot(p.clone(), right.into())));
             },
             _ => { return self.parse_unary_expression(); }
         }
     }
 
-    fn parse_term(&mut self) -> Result<SyntaxNode, (Box<std::string::String>, usize, usize)> {
+    fn parse_term(&mut self) -> Result<Rc<SyntaxNode>, (Box<std::string::String>, usize, usize)> {
         let mut left = self.parse_factor()?;
         loop {
             match &self.symbol.clone()? {
                 Symbols::Mul(p) => {
                     self.advance();
                     let right = self.parse_factor()?;
-                    left = SyntaxNode::Mul(p.clone(), left.into(), right.into());
+                    left = Rc::new(SyntaxNode::Mul(p.clone(), left.into(), right.into()));
                 },
                 Symbols::Slash(p) => {
                     self.advance();
                     let right = self.parse_factor()?;
-                    left = SyntaxNode::Slash(p.clone(), left.into(), right.into());
+                    left = Rc::new(SyntaxNode::Slash(p.clone(), left.into(), right.into()));
                 },
                 Symbols::Div(p) => {
                     self.advance();
                     let right = self.parse_factor()?;
-                    left = SyntaxNode::Div(p.clone(), left.into(), right.into());
+                    left = Rc::new(SyntaxNode::Div(p.clone(), left.into(), right.into()));
                 },
                 Symbols::Mod(p) => {
                     self.advance();
                     let right = self.parse_factor()?;
-                    left = SyntaxNode::Mod(p.clone(), left.into(), right.into());
+                    left = Rc::new(SyntaxNode::Mod(p.clone(), left.into(), right.into()));
                 },
                 Symbols::And(p) => {
                     self.advance();
                     let right = self.parse_factor()?;
-                    left = SyntaxNode::And(p.clone(), left.into(), right.into());
+                    left = Rc::new(SyntaxNode::And(p.clone(), left.into(), right.into()));
                 },
                 Symbols::DotMul(p) => {
                     self.advance();
                     let right = self.parse_factor()?;
-                    left = SyntaxNode::DotMul(p.clone(), left.into(), right.into());
+                    left = Rc::new(SyntaxNode::DotMul(p.clone(), left.into(), right.into()));
                 },
                 Symbols::DotSlash(p) => {
                     self.advance();
                     let right = self.parse_factor()?;
-                    left = SyntaxNode::DotSlash(p.clone(), left.into(), right.into());
+                    left = Rc::new(SyntaxNode::DotSlash(p.clone(), left.into(), right.into()));
                 },
                 Symbols::BackSlash(p) => {
                     self.advance();
                     let right = self.parse_factor()?;
-                    left = SyntaxNode::BackSlash(p.clone(), left.into(), right.into());
+                    left = Rc::new(SyntaxNode::BackSlash(p.clone(), left.into(), right.into()));
                 },
                 Symbols::Power(p) => {
                     self.advance();
                     let right = self.parse_factor()?;
-                    left = SyntaxNode::Power(p.clone(), left.into(), right.into());
+                    left = Rc::new(SyntaxNode::Power(p.clone(), left.into(), right.into()));
                 },
                 Symbols::PlusMul(p) => {
                     self.advance();
                     let right = self.parse_factor()?;
-                    left = SyntaxNode::PlusMul(p.clone(), left.into(), right.into());
+                    left = Rc::new(SyntaxNode::PlusMul(p.clone(), left.into(), right.into()));
                 },
                 _ => break
             }
@@ -308,24 +308,24 @@ impl ParseMethods for Parser {
         return Ok(left);
     }
 
-    fn parse_simple_expression(&mut self) -> Result<SyntaxNode, (Box<std::string::String>, usize, usize)> {
+    fn parse_simple_expression(&mut self) -> Result<Rc<SyntaxNode>, (Box<std::string::String>, usize, usize)> {
         let mut left = self.parse_term()?;
         loop {
             match &self.symbol.clone()? {
                 Symbols::Plus(p) => {
                     self.advance();
                     let right = self.parse_term()?;
-                    left = SyntaxNode::Plus(p.clone(), left.into(), right.into());
+                    left = Rc::new(SyntaxNode::Plus(p.clone(), left.into(), right.into()));
                 },
                 Symbols::Minus(p) => {
                     self.advance();
                     let right = self.parse_term()?;
-                    left = SyntaxNode::Minus(p.clone(), left.into(), right.into());
+                    left = Rc::new(SyntaxNode::Minus(p.clone(), left.into(), right.into()));
                 },
                 Symbols::Or(p) => {
                     self.advance();
                     let right = self.parse_term()?;
-                    left = SyntaxNode::Or(p.clone(), left.into(), right.into());
+                    left = Rc::new(SyntaxNode::Or(p.clone(), left.into(), right.into()));
                 },
                 _=> break
             }
@@ -333,14 +333,14 @@ impl ParseMethods for Parser {
         return Ok(left);
     }
 
-    fn parse_range_expression(&mut self) -> Result<SyntaxNode, (Box<std::string::String>, usize, usize)> {
-        let mut left = SyntaxNode::None;
-        let mut right = SyntaxNode::None;
-        let mut next = SyntaxNode::None;
+    fn parse_range_expression(&mut self) -> Result<Rc<SyntaxNode>, (Box<std::string::String>, usize, usize)> {
+        let mut left = Rc::new(SyntaxNode::None);
+        let mut right = Rc::new(SyntaxNode::None);
+        let mut next = Rc::new(SyntaxNode::None);
         match  &self.symbol.clone()? {
             Symbols::Mul(p) => {
                 self.advance();
-                return Ok(SyntaxNode::RangeMul(p.clone()));
+                return Ok(Rc::new(SyntaxNode::RangeMul(p.clone())));
             },
             Symbols::UpTo(p) => {
                 self.advance();
@@ -357,7 +357,7 @@ impl ParseMethods for Parser {
                     },
                     _ => ()
                 }
-                return Ok(SyntaxNode::Range(p.clone(), left.into(), right.into(), next.into()));
+                return Ok(Rc::new(SyntaxNode::Range(p.clone(), left.into(), right.into(), next.into())));
             }
             _ => {
                 left = self.parse_simple_expression()?;
@@ -377,118 +377,118 @@ impl ParseMethods for Parser {
                             },
                             _ => ()
                         }
-                        return Ok(SyntaxNode::Range(p.clone(), left.into(), right.into(), next.into()));
+                        return Ok(Rc::new(SyntaxNode::Range(p.clone(), left.into(), right.into(), next.into())));
                     },
                     _ => { 
-                        return Ok(left);
+                        return Ok(left.into());
                     }
                 }
             }
         }
     }
 
-    fn parse_expression(&mut self) -> Result<SyntaxNode, (Box<std::string::String>, usize, usize)> {
+    fn parse_expression(&mut self) -> Result<Rc<SyntaxNode>, (Box<std::string::String>, usize, usize)> {
         let mut left = self.parse_range_expression()?;
         match &self.symbol.clone()? {
             Symbols::Equal(p) => {
                 self.advance();
                 let right = self.parse_range_expression()?;
-                return Ok(SyntaxNode::Equal(p.clone(), left.into(), right.into()));
+                return Ok(Rc::new(SyntaxNode::Equal(p.clone(), left.into(), right.into())));
             },
             Symbols::UnEqual(p) => {
                 self.advance();
                 let right = self.parse_range_expression()?;
-                return Ok(SyntaxNode::UnEqual(p.clone(), left.into(), right.into()));
+                return Ok(Rc::new(SyntaxNode::UnEqual(p.clone(), left.into(), right.into())));
             },
             Symbols::Less(p) => {
                 self.advance();
                 let right = self.parse_range_expression()?;
-                return Ok(SyntaxNode::Less(p.clone(), left.into(), right.into()));
+                return Ok(Rc::new(SyntaxNode::Less(p.clone(), left.into(), right.into())));
             },
             Symbols::LessEqual(p) => {
                 self.advance();
                 let right = self.parse_range_expression()?;
-                return Ok(SyntaxNode::LessEqual(p.clone(), left.into(), right.into()));
+                return Ok(Rc::new(SyntaxNode::LessEqual(p.clone(), left.into(), right.into())));
             },
             Symbols::Greater(p) => {
                 self.advance();
                 let right = self.parse_range_expression()?;
-                return Ok(SyntaxNode::Greater(p.clone(), left.into(), right.into()));
+                return Ok(Rc::new(SyntaxNode::Greater(p.clone(), left.into(), right.into())));
             },
             Symbols::GreaterEqual(p) => {
                 self.advance();
                 let right = self.parse_range_expression()?;
-                return Ok(SyntaxNode::GreaterEqual(p.clone(), left.into(), right.into()));
+                return Ok(Rc::new(SyntaxNode::GreaterEqual(p.clone(), left.into(), right.into())));
             },
             Symbols::In(p) => {
                 self.advance();
                 let right = self.parse_range_expression()?;
-                return Ok(SyntaxNode::In(p.clone(), left.into(), right.into()));
+                return Ok(Rc::new(SyntaxNode::In(p.clone(), left.into(), right.into())));
             },
             Symbols::Is(p) => {
                 self.advance();
                 let right = self.parse_range_expression()?;
-                return Ok(SyntaxNode::Is(p.clone(), left.into(), right.into()));
+                return Ok(Rc::new(SyntaxNode::Is(p.clone(), left.into(), right.into())));
             },
             Symbols::DotEqual(p) => {
                 self.advance();
                 let right = self.parse_range_expression()?;
-                return Ok(SyntaxNode::DotEqual(p.clone(), left.into(), right.into()));
+                return Ok(Rc::new(SyntaxNode::DotEqual(p.clone(), left.into(), right.into())));
             },
             Symbols::DotUnEqual(p) => {
                 self.advance();
                 let right = self.parse_range_expression()?;
-                return Ok(SyntaxNode::DotUnEqual(p.clone(), left.into(), right.into()));
+                return Ok(Rc::new(SyntaxNode::DotUnEqual(p.clone(), left.into(), right.into())));
             },
             Symbols::DotLess(p) => {
                 self.advance();
                 let right = self.parse_range_expression()?;
-                return Ok(SyntaxNode::DotLess(p.clone(), left.into(), right.into()));
+                return Ok(Rc::new(SyntaxNode::DotLess(p.clone(), left.into(), right.into())));
             },
             Symbols::DotLessEqual(p) => {
                 self.advance();
                 let right = self.parse_range_expression()?;
-                return Ok(SyntaxNode::DotLessEqual(p.clone(), left.into(), right.into()));
+                return Ok(Rc::new(SyntaxNode::DotLessEqual(p.clone(), left.into(), right.into())));
             },
             Symbols::DotGreater(p) => {
                 self.advance();
                 let right = self.parse_range_expression()?;
-                return Ok(SyntaxNode::DotGreater(p.clone(), left.into(), right.into()));
+                return Ok(Rc::new(SyntaxNode::DotGreater(p.clone(), left.into(), right.into())));
             },
             Symbols::DotGreaterEqual(p) => {
                 self.advance();
                 let right = self.parse_range_expression()?;
-                return Ok(SyntaxNode::DotGreaterEqual(p.clone(), left.into(), right.into()));
+                return Ok(Rc::new(SyntaxNode::DotGreaterEqual(p.clone(), left.into(), right.into())));
             },
             Symbols::QuestionMarkQuestionMark(p) => {
                 self.advance();
                 let right = self.parse_range_expression()?;
-                return Ok(SyntaxNode::QuestionMarkQuestionMark(p.clone(), left.into(), right.into()));
+                return Ok(Rc::new(SyntaxNode::QuestionMarkQuestionMark(p.clone(), left.into(), right.into())));
             },
             Symbols::ExclamationMarkExclamationMark(p) => {
                 self.advance();
                 let right = self.parse_range_expression()?;
-                return Ok(SyntaxNode::ExclamationMarkExclamationMark(p.clone(), left.into(), right.into()));
+                return Ok(Rc::new(SyntaxNode::ExclamationMarkExclamationMark(p.clone(), left.into(), right.into())));
             },
             Symbols::LessLessQ(p) => {
                 self.advance();
                 let right = self.parse_range_expression()?;
-                return Ok(SyntaxNode::LessLessQ(p.clone(), left.into(), right.into()));
+                return Ok(Rc::new(SyntaxNode::LessLessQ(p.clone(), left.into(), right.into())));
             },
             Symbols::GreaterGreaterQ(p) => {
                 self.advance();
                 let right = self.parse_range_expression()?;
-                return Ok(SyntaxNode::GreaterGreaterQ(p.clone(), left.into(), right.into()));
+                return Ok(Rc::new(SyntaxNode::GreaterGreaterQ(p.clone(), left.into(), right.into())));
             },
             _ => { return Ok(left); }
         }
     }
 
-    fn parse_flags(&mut self) -> Result<SyntaxNode, (Box<std::string::String>, usize, usize)> {
+    fn parse_flags(&mut self) -> Result<Rc<SyntaxNode>, (Box<std::string::String>, usize, usize)> {
         todo!()
     }
 
-    fn parse_designator_operations(&mut self) -> Result<SyntaxNode, (Box<std::string::String>, usize, usize)> {
+    fn parse_designator_operations(&mut self) -> Result<Rc<SyntaxNode>, (Box<std::string::String>, usize, usize)> {
         let mut nodes = Vec::<SyntaxNode>::new();
         let ( pos, _ ) = self.lexer.get_location();
 
@@ -518,7 +518,7 @@ impl ParseMethods for Parser {
                 Symbols::LeftParen(p) => {
                     self.advance();
                     let right = match &self.symbol.clone()? {
-                        Symbols::RightParen(_) => SyntaxNode::None,
+                        Symbols::RightParen(_) => Rc::new(SyntaxNode::None),
                         _ => { self.parse_expression_list()? }
                     };
                     match &self.symbol.clone()? {
@@ -535,7 +535,7 @@ impl ParseMethods for Parser {
                 Symbols::LeftBracket(p) => {
                     self.advance();
                     let right = match &self.symbol.clone()? {
-                        Symbols::RightBracket(_) => SyntaxNode::None,
+                        Symbols::RightBracket(_) => Rc::new(SyntaxNode::None),
                         _ => { self.parse_index_list()? }
                     };
                     match &self.symbol.clone()? {
@@ -555,14 +555,14 @@ impl ParseMethods for Parser {
             }
         }
 
-        return Ok(SyntaxNode::DesignatorElements(pos.clone(), Rc::new(nodes.into())));
+        return Ok(Rc::new(SyntaxNode::DesignatorElements(pos.clone(), Rc::new(nodes.into()))));
     }
 
-    fn parse_expression_list(&mut self) -> Result<SyntaxNode, (Box<std::string::String>, usize, usize)> {
+    fn parse_expression_list(&mut self) -> Result<Rc<SyntaxNode>, (Box<std::string::String>, usize, usize)> {
         todo!()
     }
 
-    fn parse_index_list(&mut self) -> Result<SyntaxNode, (Box<std::string::String>, usize, usize)> {
+    fn parse_index_list(&mut self) -> Result<Rc<SyntaxNode>, (Box<std::string::String>, usize, usize)> {
         todo!()
     }
 }
@@ -585,7 +585,7 @@ mod tests {
 
         match res {
             Ok(s) => {
-                assert_eq!(SyntaxNode::Nil(0), s);
+                assert_eq!(Rc::new(SyntaxNode::Nil(0)), s);
             },
             _ => {
                 assert!(false);
@@ -601,7 +601,7 @@ mod tests {
 
         match res {
             Ok(s) => {
-                assert_eq!(SyntaxNode::Imag(0), s);
+                assert_eq!(Rc::new(SyntaxNode::Imag(0)), s);
             },
             _ => {
                 assert!(false);
@@ -617,7 +617,7 @@ mod tests {
 
         match res {
             Ok(s) => {
-                assert_eq!(SyntaxNode::True(0), s);
+                assert_eq!(Rc::new(SyntaxNode::True(0)), s);
             },
             _ => {
                 assert!(false);
@@ -633,7 +633,7 @@ mod tests {
 
         match res {
             Ok(s) => {
-                assert_eq!(SyntaxNode::False(0), s);
+                assert_eq!(Rc::new(SyntaxNode::False(0)), s);
             },
             _ => {
                 assert!(false);
@@ -649,7 +649,7 @@ mod tests {
 
         match res {
             Ok(s) => {
-                assert_eq!(SyntaxNode::_Self(0), s);
+                assert_eq!(Rc::new(SyntaxNode::_Self(0)), s);
             },
             _ => {
                 assert!(false);
@@ -665,7 +665,7 @@ mod tests {
 
         match res {
             Ok(s) => {
-                assert_eq!(SyntaxNode::Result(0), s);
+                assert_eq!(Rc::new(SyntaxNode::Result(0)), s);
             },
             _ => {
                 assert!(false);
@@ -681,7 +681,7 @@ mod tests {
 
         match res {
             Ok(s) => {
-                assert_eq!(SyntaxNode::Alias(0), s);
+                assert_eq!(Rc::new(SyntaxNode::Alias(0)), s);
             },
             _ => {
                 assert!(false);
@@ -697,7 +697,7 @@ mod tests {
 
         match res {
             Ok(s) => {
-                assert_eq!(SyntaxNode::AliasOf(0, Rc::new( SyntaxNode::Ident(9, Box::new(String::from("test"))) )), s);
+                assert_eq!(Rc::new(SyntaxNode::AliasOf(0, Rc::new( SyntaxNode::Ident(9, Box::new(String::from("test"))) ))), s);
             },
             _ => {
                 assert!(false);
@@ -713,7 +713,7 @@ mod tests {
 
         match res {
             Ok(s) => {
-                assert_eq!(SyntaxNode::Address(0), s);
+                assert_eq!(Rc::new(SyntaxNode::Address(0)), s);
             },
             _ => {
                 assert!(false);
@@ -729,7 +729,7 @@ mod tests {
 
         match res {
             Ok(s) => {
-                assert_eq!(SyntaxNode::AddressOf(0, Rc::new( SyntaxNode::Ident(11, Box::new(String::from("test"))) )), s);
+                assert_eq!(Rc::new(SyntaxNode::AddressOf(0, Rc::new( SyntaxNode::Ident(11, Box::new(String::from("test"))) ))), s);
             },
             _ => {
                 assert!(false);
@@ -745,7 +745,7 @@ mod tests {
 
         match res {
             Ok(s) => {
-                assert_eq!(SyntaxNode::Size(0), s);
+                assert_eq!(Rc::new(SyntaxNode::Size(0)), s);
             },
             _ => {
                 assert!(false);
@@ -761,7 +761,7 @@ mod tests {
 
         match res {
             Ok(s) => {
-                assert_eq!(SyntaxNode::SizeOf(0, Rc::new( SyntaxNode::Ident(8, Box::new(String::from("test"))) )), s);
+                assert_eq!(Rc::new(SyntaxNode::SizeOf(0, Rc::new( SyntaxNode::Ident(8, Box::new(String::from("test"))) ))), s);
             },
             _ => {
                 assert!(false);
@@ -777,7 +777,7 @@ mod tests {
 
         match res {
             Ok(s) => {
-                assert_eq!(SyntaxNode::Ident(0, Box::new(String::from("variable_1"))), s);
+                assert_eq!(Rc::new(SyntaxNode::Ident(0, Box::new(String::from("variable_1")))), s);
             },
             _ => {
                 assert!(false);
@@ -793,7 +793,7 @@ mod tests {
 
         match res {
             Ok(s) => {
-                assert_eq!(SyntaxNode::Ident(1, Box::new(String::from("variable_1"))), s);
+                assert_eq!(Rc::new(SyntaxNode::Ident(1, Box::new(String::from("variable_1")))), s);
             },
             _ => {
                 assert!(false);
@@ -809,7 +809,7 @@ mod tests {
 
         match res {
             Ok(s) => {
-                assert_eq!(SyntaxNode::UnaryPlus(0, Rc::new(SyntaxNode::Ident(1, Box::new(String::from("a"))))), s);
+                assert_eq!(Rc::new(SyntaxNode::UnaryPlus(0, Rc::new(SyntaxNode::Ident(1, Box::new(String::from("a")))))), s);
             },
             _ => {
                 assert!(false);
@@ -825,7 +825,7 @@ mod tests {
 
         match res {
             Ok(s) => {
-                assert_eq!(SyntaxNode::UnaryMinus(0, Rc::new(SyntaxNode::Ident(1, Box::new(String::from("a"))))), s);
+                assert_eq!(Rc::new(SyntaxNode::UnaryMinus(0, Rc::new(SyntaxNode::Ident(1, Box::new(String::from("a")))))), s);
             },
             _ => {
                 assert!(false);
@@ -841,7 +841,7 @@ mod tests {
 
         match res {
             Ok(s) => {
-                assert_eq!(SyntaxNode::UnaryNot(0, Rc::new(SyntaxNode::Ident(1, Box::new(String::from("a"))))), s);
+                assert_eq!(Rc::new(SyntaxNode::UnaryNot(0, Rc::new(SyntaxNode::Ident(1, Box::new(String::from("a")))))), s);
             },
             _ => {
                 assert!(false);
