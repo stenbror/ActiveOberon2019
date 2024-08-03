@@ -388,7 +388,7 @@ impl ParseMethods for Parser {
     }
 
     fn parse_expression(&mut self) -> Result<Rc<SyntaxNode>, (Box<std::string::String>, usize, usize)> {
-        let mut left = self.parse_range_expression()?;
+        let left = self.parse_range_expression()?;
         match &self.symbol.clone()? {
             Symbols::Equal(p) => {
                 self.advance();
@@ -502,7 +502,7 @@ impl ParseMethods for Parser {
                     self.advance();
                     nodes.push(SyntaxNode::DesignatorArrow(p.clone()));
                 },
-                Symbols::Period(p) => {
+                Symbols::Period(_) => {
                     self.advance();
                     match &self.symbol.clone()? {
                         Symbols::Ident(p, s) => {
@@ -574,7 +574,6 @@ mod tests {
 
     use std::rc::Rc;
 
-    use crate::scanner::{Scanner, ScannerMethods, Symbols};
     use crate::parser::{Parser, ParseMethods, SyntaxNode};
 
     #[test]
@@ -848,4 +847,24 @@ mod tests {
             }
         } 
     }
+/*
+    #[test]
+    fn factor_unary_minus_minus() {
+        let mut parser = Parser::new("--a", false);
+        parser.advance();
+        let res = parser.parse_expression();
+
+        match res {
+            Ok(s) => {
+                assert_eq!(
+                    Rc::new(SyntaxNode::UnaryMinus(0, 
+                    Rc::new(SyntaxNode::UnaryMinus(1, Rc::new(SyntaxNode::Ident(2, Box::new(String::from("a"))))))
+                    ))
+                    , s);
+            },
+            _ => {
+                assert!(false);
+            }
+        } 
+    } */
 }

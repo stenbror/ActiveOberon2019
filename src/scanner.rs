@@ -347,7 +347,7 @@ impl ScannerMethods for Scanner {
             '&' => { self.next_char(); return Ok(Symbols::And(pos_symb)); }
             '+' => { 
                 self.next_char(); 
-                if (self.get_char() == '*') { 
+                if self.get_char() == '*' {
                     self.next_char(); 
                     return Ok(Symbols::PlusMul(pos_symb)); }
                 
@@ -486,7 +486,7 @@ impl ScannerMethods for Scanner {
                     _ => { return Ok(Symbols::Period(pos_symb)); }
                 }
             },
-            '0' | '1' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' => {
+            '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' => {
                 todo!()
             } ,
             '"' => {
@@ -517,7 +517,7 @@ impl ScannerMethods for Scanner {
                         match symb {
                             Some(s) => { 
                                 match s {
-                                    Symbols::Code(p) => { /* Collect all until 'END' is found */
+                                    Symbols::Code(_) => { /* Collect all until 'END' is found */
                                         let mut asm_text = std::string::String::new();
 
                                         loop {
@@ -553,7 +553,7 @@ impl ScannerMethods for Scanner {
                     match symb1 {
                         Some(s) => {
                             match s {
-                                Symbols::Code(p) => { /* Collect all until 'END' or 'end' is found */
+                                Symbols::Code(_) => { /* Collect all until 'END' or 'end' is found */
                                     let mut asm_text = std::string::String::new();
 
                                     loop {
@@ -587,7 +587,7 @@ impl ScannerMethods for Scanner {
                             match symb2 {
                                 Some(s) => { 
                                     match s {
-                                        Symbols::Code(p) => { /* Collect all until 'END' or 'end' is found */
+                                        Symbols::Code(_) => { /* Collect all until 'END' or 'end' is found */
                                             let mut asm_text = std::string::String::new();
 
                                             loop {
@@ -1563,7 +1563,7 @@ mod tests {
         match symb {
             Ok(x) => {
                 match x {
-                    Symbols::CodeText(p, t) => {
+                    Symbols::CodeText(p, _) => {
                         assert_eq!(1, p);
                     },
                     _ => { assert!(false); }
@@ -2535,7 +2535,7 @@ mod tests {
         match symb {
             Ok(x) => {
                 match x {
-                    Symbols::CodeText(p, t) => {
+                    Symbols::CodeText(p, _) => {
                         assert_eq!(1, p);
                     },
                     _ => { assert!(false); }
@@ -3454,7 +3454,7 @@ mod tests {
         match symb {
             Ok(x) => {
                 match x {
-                    Symbols::CodeText(p, s) => {
+                    Symbols::CodeText(_, _) => {
                         assert!(true);    
                     },
                     _ => { assert!(false); }
@@ -3468,7 +3468,7 @@ mod tests {
         match symb2 {
             Ok(x) => {
                 match x {
-                    Symbols::End(p) => {
+                    Symbols::End(_) => {
                         assert!(true);
                     },
                     _ => { assert!(false); }
@@ -3486,7 +3486,7 @@ mod tests {
         match symb {
             Ok(x) => {
                 match x {
-                    Symbols::CodeText(p, s) => {
+                    Symbols::CodeText(_, _) => {
                         assert!(true);
                     },
                     _ => { assert!(false); }
@@ -3500,7 +3500,7 @@ mod tests {
         match symb2 {
             Ok(x) => {
                 match x {
-                    Symbols::End(p) => {
+                    Symbols::End(_) => {
                         assert!(true);
                     },
                     _ => { assert!(false); }

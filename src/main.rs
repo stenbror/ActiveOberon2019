@@ -3,8 +3,7 @@ mod parser;
 
 use inline_colorization::*;
 
-use crate::scanner::{Scanner, ScannerMethods, Symbols};
-use crate::parser::{Parser, ParseMethods, SyntaxNode};
+use crate::parser::{Parser, ParseMethods};
 
 const COMPILE_DATE_STRING: &str = compile_time::date_str!();
 
@@ -14,7 +13,7 @@ fn main() {
 
     let mut parser = Parser::new("code test end ", false);
     parser.advance();
-    let symb = parser.parse_expression();
+    let _ = parser.parse_expression();
 
     println!("\r\n {color_bright_green}Active Oberon (2019 Revision){color_reset} Compiler, Version {version} [Build: {COMPILE_DATE_STRING}]\r\n");
 }
